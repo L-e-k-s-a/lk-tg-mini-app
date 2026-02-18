@@ -43,9 +43,9 @@ export default function DebugTgInfo() {
 			{typeof window !== 'undefined' && window?.Telegram?.WebApp && (
 				<View style={styles.section}>
 					<Text style={styles.sectionTitle}>🌐 WebApp данные:</Text>
-					<Text>Версия: {window.WebApp.version}</Text>
-					<Text>Платформа: {window.WebApp.platform}</Text>
-					<Text>Цветовая схема: {window.WebApp.colorScheme}</Text>
+					<Text>Версия: {window?.Telegram?.WebApp?.version}</Text>
+					<Text>Платформа: {window?.Telegram?.WebApp?.platform}</Text>
+					<Text>Цветовая схема: {window?.Telegram?.WebApp?.colorScheme}</Text>
 				</View>
 			)}
 			<Button
