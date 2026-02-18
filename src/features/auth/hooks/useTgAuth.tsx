@@ -85,7 +85,7 @@ export const useTgAuth = () => {
     script.async = true;
 
     script.onload = () => {
-      console.log('MAX Bridge loaded');
+      console.log('Tg Bridge loaded');
       // Даем время на инициализацию
       setTimeout(() => {
         if (window.WebApp) {
@@ -95,7 +95,7 @@ export const useTgAuth = () => {
     };
 
     script.onerror = () => {
-      console.error('Failed to load MAX Bridge');
+      console.error('Failed to load Tg Bridge');
     };
 
     document.head.appendChild(script);
@@ -118,7 +118,7 @@ export const useTgAuth = () => {
     // Сообщаем о готовности
     webApp.ready();
 
-    console.log('MAX initialized:', user);
+    console.log('Tg initialized:', user);
   };
 
   const applyTgTheme = (theme: TgThemeParams) => {
