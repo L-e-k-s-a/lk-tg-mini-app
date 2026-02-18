@@ -9,7 +9,7 @@ export default function Layout() {
 				screenOptions={{
 					headerShown: false,
 				}}>
-				<Stack.Screen name='max' />
+				<Stack.Screen name='debug' />
 			</Stack>
 		</Container>
 	);

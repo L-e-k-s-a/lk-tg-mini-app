@@ -2,69 +2,19 @@
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
-// Типы для MAX
-interface TgUser {
-	id: number;
-	first_name?: string;
-	last_name?: string;
-	username?: string;
-	language_code?: string;
-}
-
-interface TgInitData {
-	user?: TgUser;
-	auth_date?: number;
-	hash?: string;
-}
-
-interface TgThemeParams {
-	bg_color?: string;
-	text_color?: string;
-	button_color?: string;
-	button_text_color?: string;
-}
-
-interface TgMainButton {
-	show: () => void;
-	hide: () => void;
-	setText: (text: string) => void;
-	onClick: (callback: () => void) => void;
-	offClick: (callback: () => void) => void;
-	enable: () => void;
-	disable: () => void;
-}
-
-interface TgBackButton {
-	show: () => void;
-	hide: () => void;
-	onClick: (callback: () => void) => void;
-	offClick: (callback: () => void) => void;
-}
-
-interface TgWebApp {
-	ready: () => void;
-	expand: () => void;
-	close: () => void;
-	sendData: (data: string) => void;
-	MainButton: TgMainButton;
-	BackButton: TgBackButton;
-	initData: string;
-	initDataUnsafe: TgInitData;
-	themeParams: TgThemeParams;
-	onEvent: (event: string, callback: () => void) => void;
-	offEvent: (event: string, callback: () => void) => void;
-}
-
-// Расширяем глобальный объект Window
+// Добавьте проверку типа
 declare global {
 	interface Window {
-		WebApp?: TgWebApp;
+		WebApp?: any;
+		Telegram?: {
+			WebApp?: any;
+		};
 	}
 }
 
 export const useTgAuth = () => {
 	const [tgInitialized, setTgInitialized] = useState(false);
-	const [tgUser, setTgUser] = useState<TgUser | null>(null);
+	const [tgUser, setTgUser] = useState<any | null>(null);
 
 	useEffect(() => {
 		if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -73,7 +23,13 @@ export const useTgAuth = () => {
 	}, []);
 
 	const loadTgScript = () => {
-		// Проверяем, есть ли уже WebApp
+		// Проверяем через Telegram объект
+		if (window.Telegram?.WebApp) {
+			handleTgInit(window.Telegram.WebApp);
+			return;
+		}
+
+		// Альтернативная проверка
 		if (window.WebApp) {
 			handleTgInit(window.WebApp);
 			return;
@@ -86,10 +42,13 @@ export const useTgAuth = () => {
 
 		script.onload = () => {
 			console.log('Tg Bridge loaded');
-			// Даем время на инициализацию
 			setTimeout(() => {
-				if (window.WebApp) {
+				if (window.Telegram?.WebApp) {
+					handleTgInit(window.Telegram.WebApp);
+				} else if (window.WebApp) {
 					handleTgInit(window.WebApp);
+				} else {
+					console.error('WebApp not found after script load');
 				}
 			}, 100);
 		};
@@ -101,44 +60,41 @@ export const useTgAuth = () => {
 		document.head.appendChild(script);
 	};
 
-	const handleTgInit = (webApp: TgWebApp) => {
+	const handleTgInit = (webApp: any) => {
+		// Используйте any или импортированный тип
 		setTgInitialized(true);
 
-		// Получаем данные пользователя
+		// Подробное логирование
+		console.log('Telegram WebApp данные:', {
+			initData: webApp.initData,
+			initDataUnsafe: webApp.initDataUnsafe,
+			version: webApp.version,
+			platform: webApp.platform,
+		});
+
 		const user = webApp.initDataUnsafe?.user;
 		if (user) {
+			console.log('Пользователь TG:', user);
 			setTgUser(user);
 		}
 
-		// Применяем тему
 		if (webApp.themeParams) {
 			applyTgTheme(webApp.themeParams);
 		}
 
-		// Сообщаем о готовности
 		webApp.ready();
-
-		console.log('Tg initialized:', webApp);
+		console.log('Telegram WebApp инициализирован');
 	};
 
-	const applyTgTheme = (theme: TgThemeParams) => {
-		if (theme.bg_color) {
-			document.documentElement.style.setProperty(
-				'--max-bg-color',
-				theme.bg_color,
-			);
-		}
-		if (theme.text_color) {
-			document.documentElement.style.setProperty(
-				'--max-text-color',
-				theme.text_color,
-			);
-		}
+	const applyTgTheme = (themeParams: any) => {
+		// Ваша логика применения темы
+		console.log('Применяем тему:', themeParams);
 	};
 
 	return {
-		tgInitialized: tgInitialized,
-		tgUser: tgUser,
-		isTgEnvironment: Platform.OS === 'web' && !!window.WebApp,
+		tgInitialized,
+		tgUser,
+		isTgEnvironment:
+			Platform.OS === 'web' && (!!window.Telegram?.WebApp || !!window.WebApp),
 	};
 };

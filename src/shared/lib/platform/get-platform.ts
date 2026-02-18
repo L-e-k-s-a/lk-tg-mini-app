@@ -1,6 +1,15 @@
 // lib/platform/detect.ts
 import { Platform as RNPlatform } from 'react-native';
 
+declare global {
+	interface Window {
+		Telegram?: {
+			WebApp?: any;
+		};
+		WebApp?: any;
+	}
+}
+
 export type AppPlatform =
 	| 'ios'
 	| 'android'
@@ -9,22 +18,16 @@ export type AppPlatform =
 	| 'tgMobile'
 	| 'unknown';
 
-/**
- * Detects the platform/environment the app is running in.
- */
 export const detectPlatform = (): AppPlatform => {
-	// Mobile native platforms
 	if (RNPlatform.OS === 'ios') return 'ios';
 	if (RNPlatform.OS === 'android') return 'android';
 
-	// Web platform
 	if (RNPlatform.OS === 'web') {
 		if (typeof window !== 'undefined') {
-			// Telegram WebApp detection
-			const tg = (window as any).Telegram?.WebApp;
-			if (tg) return 'tgWeb';
+			// Проверяем оба возможных места расположения WebApp
+			const tgWebApp = window.Telegram?.WebApp || window.WebApp;
+			if (tgWebApp) return 'tgWeb';
 
-			// Optional: detect if in Telegram mobile browser (not WebApp)
 			const userAgent = window.navigator.userAgent.toLowerCase();
 			if (userAgent.includes('telegram')) return 'tgMobile';
 		}
