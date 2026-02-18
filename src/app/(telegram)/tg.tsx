@@ -19,12 +19,11 @@ export default function TgAuthScreen(){
     }
 
     const tg = (window as any).Telegram?.WebApp
-    console.log("Init data TG", tg.initData)
 
     return(
       <View>
         <Text>Start tg</Text>
-        <Text>{tg.initData}</Text>
+        <Text>{tg.initDataUnsafe}</Text>
       </View>
     )
 }
