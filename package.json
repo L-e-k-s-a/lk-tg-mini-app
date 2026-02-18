@@ -8,8 +8,8 @@
 		"dev": "expo start --localhost",
 		"build:web": "expo export --platform web",
 		"build:mobile": "expo export",
-		"deploy": "npm run build:web && gh-pages -d web-build",
-		"deploy:clean": "npm run build:web && gh-pages -d web-build -t true"
+		"deploy": "npm run build:web && gh-pages -d dist",
+		"deploy:clean": "npm run build:web && gh-pages -d dist -t true"
 	},
 	"dependencies": {
 		"@apollo/client": "^3.9.7",
