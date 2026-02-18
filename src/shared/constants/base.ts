@@ -1,6 +1,6 @@
 import { detectPlatform } from '@/shared/lib/platform/get-platform';
 export const DOMAIN: string = 'lk-dev.tsutmb.ru';
-
+export const MOBILE_APP_URL: string = 'deadsxnpai.github.io';
 export const BASE_URL = `https://${DOMAIN}/api`;
 
 export const dev = 'lk-dev.tsutmb.ru/api';
@@ -13,9 +13,9 @@ export const getAuthRedirect = () => {
 		if (typeof window !== 'undefined') {
 			return window.location.hostname === 'localhost'
 				? 'http://localhost:8081'
-				: `https://${DOMAIN}`;
+				: `https://${MOBILE_APP_URL}`;
 		}
-		return `https://${DOMAIN}`;
+		return `https://${MOBILE_APP_URL}`;
 	}
 
 	return 'tsumobile://app';
@@ -26,9 +26,9 @@ export const getLogoutRedirect = () => {
 		if (typeof window !== 'undefined') {
 			return window.location.hostname === 'localhost'
 				? 'http://localhost:8081/login'
-				: `https://${DOMAIN}/login`;
+				: `https://${MOBILE_APP_URL}/login`;
 		}
-		return `https://${DOMAIN}/login`;
+		return `https://${MOBILE_APP_URL}/login`;
 	}
 
 	return 'tsumobile://app/logout';
