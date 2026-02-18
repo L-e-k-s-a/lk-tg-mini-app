@@ -10,7 +10,14 @@
 			"@/features/*": ["./src/features/*"],
 			"@/entities/*": ["./src/entities/*"],
 			"@/shared/*": ["./src/shared/*"]
-		}
+		},
+		"typeRoots": ["./node_modules/@types", "./src/shared/types"]
 	},
-	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		".expo/types/**/*.ts",
+		"expo-env.d.ts",
+		"./src/shared/types/**/*.d.ts"
+	]
 }

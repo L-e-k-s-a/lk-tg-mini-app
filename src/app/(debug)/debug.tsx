@@ -40,7 +40,7 @@ export default function DebugTgInfo() {
 				</View>
 			)}
 
-			{typeof window !== 'undefined' && window.WebApp && (
+			{typeof window !== 'undefined' && window?.Telegram?.WebApp && (
 				<View style={styles.section}>
 					<Text style={styles.sectionTitle}>🌐 WebApp данные:</Text>
 					<Text>Версия: {window.WebApp.version}</Text>
