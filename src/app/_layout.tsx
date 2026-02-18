@@ -1,33 +1,49 @@
+import { useAuthStore } from '@/features/auth';
 import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
-import { Loader } from '@/shared';
 import { AppDefaultTheme } from '@/shared/constants/theme';
 import { ApolloProvider, AppContextProvider } from '@/shared/lib';
 import { ThemeProvider } from '@react-navigation/native';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
 const InitialLayout = () => {
-	// const { isAuth, loading, checkAuth } = useAuthStore();
+	const { isAuth, loading, loginWithTelegram } = useAuthStore();
+	const { tgWebApp, tgInitialized, isLoading } = useTgAuth();
+	const [telegramChecked, setTelegramChecked] = useState(false);
 
 	// useEffect(() => {
-	// 	checkAuth();
-	// }, []);
+	// 	const tryTelegramLogin = async () => {
+	// 		if (!tgInitialized) return;
+	// 		if (!tgWebApp?.initData) {
+	// 			setTelegramChecked(true);
+	// 			return;
+	// 		}
 
-	const { isLoading } = useTgAuth();
+	// 		try {
+	// 			await loginWithTelegram(tgWebApp.initData);
+	// 		} catch (e) {
+	// 			console.log('[Telegram login failed]');
+	// 		} finally {
+	// 			setTelegramChecked(true);
+	// 		}
+	// 	};
 
-	if (isLoading) return <Loader />;
+	// 	tryTelegramLogin();
+	// }, [tgInitialized]);
+
+	// if (isLoading || loading || !telegramChecked) return <Loader />;
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
-			<Stack.Protected guard={true}>
+			<Stack.Protected guard={isAuth}>
 				<Stack.Screen name='(tabs)' />
 			</Stack.Protected>
 
-			{/* <Stack.Protected guard={!true}>
+			<Stack.Protected guard={!isAuth}>
 				<Stack.Screen name='(auth)' />
-			</Stack.Protected> */}
+			</Stack.Protected>
 
 			<Stack.Screen name='+not-found' />
 		</Stack>
