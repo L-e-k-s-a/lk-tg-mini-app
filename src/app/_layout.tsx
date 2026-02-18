@@ -1,3 +1,5 @@
+import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
+import { Loader } from '@/shared';
 import { AppDefaultTheme } from '@/shared/constants/theme';
 import { ApolloProvider, AppContextProvider } from '@/shared/lib';
 import { ThemeProvider } from '@react-navigation/native';
@@ -13,7 +15,9 @@ const InitialLayout = () => {
 	// 	checkAuth();
 	// }, []);
 
-	// if (loading) return <Loader />;
+	const { isLoading } = useTgAuth();
+
+	if (isLoading) return <Loader />;
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
