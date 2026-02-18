@@ -2,16 +2,6 @@
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
-// Добавьте проверку типа
-declare global {
-	interface Window {
-		WebApp?: any;
-		Telegram?: {
-			WebApp?: any;
-		};
-	}
-}
-
 export const useTgAuth = () => {
 	const [tgInitialized, setTgInitialized] = useState(false);
 	const [tgUser, setTgUser] = useState<any | null>(null);
