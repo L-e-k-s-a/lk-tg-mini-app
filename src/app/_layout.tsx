@@ -1,4 +1,5 @@
 import { useMaxAuth } from '@/features/auth/hooks/useMaxAuth';
+import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
 import { Loader } from '@/shared';
 import { AppDefaultTheme } from '@/shared/constants/theme';
 import { ApolloProvider, AppContextProvider } from '@/shared/lib';
@@ -24,7 +25,22 @@ const MaxInitializer = ({ children }: { children: React.ReactNode }) => {
 
 	return <>{children}</>;
 };
+// Компонент для инициализации MAX
+const TGInitializer = ({ children }: { children: React.ReactNode }) => {
+	const { tgInitialized, isTgEnvironment } = useTgAuth();
 
+	// Показываем загрузку пока MAX инициализируется
+	if (isTgEnvironment && !tgInitialized) {
+		return (
+			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+				<Loader />
+				<Text style={{ marginTop: 10 }}>Подключение к MAX...</Text>
+			</View>
+		);
+	}
+
+	return <>{children}</>;
+};
 const InitialLayout = () => {
 	// const { isAuth, loading, checkAuth } = useAuthStore();
 
@@ -64,9 +80,9 @@ export default function RootLayout() {
 		<ApolloProvider>
 			<AppContextProvider>
 				<ThemeProvider value={AppDefaultTheme}>
-					<MaxInitializer>
+					<TGInitializer>
 						<InitialLayout />
-					</MaxInitializer>
+					</TGInitializer>
 					<StatusBar style='auto' />
 				</ThemeProvider>
 			</AppContextProvider>
