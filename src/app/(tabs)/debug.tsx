@@ -5,7 +5,7 @@ import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function DebugTgInfo() {
 	const {
@@ -15,7 +15,9 @@ export default function DebugTgInfo() {
 		platform,
 		isMobile,
 		isLoading,
+		userAgent,
 	} = useTgAuth();
+
 	const [webAppInfo, setWebAppInfo] = useState<any>(null);
 
 	useEffect(() => {
@@ -30,7 +32,6 @@ export default function DebugTgInfo() {
 						colorScheme: webApp.colorScheme,
 						isExpanded: webApp.isExpanded,
 						viewportHeight: webApp.viewportHeight,
-						viewportStableHeight: webApp.viewportStableHeight,
 					});
 				}
 			}
@@ -39,22 +40,22 @@ export default function DebugTgInfo() {
 		return () => clearInterval(interval);
 	}, []);
 
+	// Тестовая функция для проверки определения
+	const testDetection = () => {
+		Alert.alert(
+			'Информация об устройстве',
+			`Platform: ${platform}\n` +
+				`isMobile: ${isMobile}\n` +
+				`isTgEnvironment: ${isTgEnvironment}\n` +
+				`UserAgent: ${userAgent}`,
+		);
+	};
+
 	if (isLoading) {
 		return (
 			<MainLayout>
 				<View style={styles.container}>
 					<Text style={styles.title}>⏳ Загрузка Telegram WebApp...</Text>
-				</View>
-			</MainLayout>
-		);
-	}
-
-	if (!isTgEnvironment) {
-		return (
-			<MainLayout>
-				<View style={styles.container}>
-					<Text style={styles.title}>❌ Не в среде Telegram</Text>
-					<Text>Откройте это приложение через Telegram Mini App</Text>
 				</View>
 			</MainLayout>
 		);
@@ -69,15 +70,26 @@ export default function DebugTgInfo() {
 					<Text style={styles.sectionTitle}>Статус:</Text>
 					<Text>Инициализирован: {tgInitialized ? '✅' : '⏳'}</Text>
 					<Text>Среда TG: {isTgEnvironment ? '✅' : '❌'}</Text>
-					<Text>Платформа: {platform || 'не определена'}</Text>
+					<Text>Платформа: {platform}</Text>
 					<Text>Мобильное устройство: {isMobile ? '✅' : '❌'}</Text>
+				</View>
+
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>📱 Информация об устройстве:</Text>
+					<Text>User Agent: {userAgent}</Text>
+					<Button
+						title='Тест определения'
+						onPress={testDetection}
+						variant='secondary'
+						style={styles.testButton}
+					/>
 				</View>
 
 				{webAppInfo && (
 					<View style={styles.section}>
 						<Text style={styles.sectionTitle}>🌐 WebApp данные:</Text>
 						<Text>Версия: {webAppInfo.version}</Text>
-						<Text>Платформа: {webAppInfo.platform}</Text>
+						<Text>Платформа (WebApp): {webAppInfo.platform}</Text>
 						<Text>Цветовая схема: {webAppInfo.colorScheme}</Text>
 						<Text>Развернут: {webAppInfo.isExpanded ? '✅' : '❌'}</Text>
 						<Text>Высота: {webAppInfo.viewportHeight}</Text>
@@ -89,7 +101,7 @@ export default function DebugTgInfo() {
 						<Text style={styles.sectionTitle}>👤 Пользователь:</Text>
 						<Text>ID: {tgUser.id}</Text>
 						<Text>
-							Имя: {tgUser.first_name} {tgUser.last_user || ''}
+							Имя: {tgUser.first_name} {tgUser.last_name || ''}
 						</Text>
 						<Text>Username: @{tgUser.username || 'не указан'}</Text>
 						<Text>Язык: {tgUser.language_code || 'не указан'}</Text>
@@ -137,5 +149,8 @@ const styles = StyleSheet.create({
 	},
 	buttonBack: {
 		marginTop: 20,
+	},
+	testButton: {
+		marginTop: 10,
 	},
 });
