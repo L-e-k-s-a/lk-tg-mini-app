@@ -24,7 +24,7 @@ export default function DebugTgInfo() {
 		// Периодически проверяем обновление данных WebApp
 		const interval = setInterval(() => {
 			if (typeof window !== 'undefined') {
-				const webApp = window.Telegram?.WebApp || window.WebApp;
+				const webApp = window.Telegram?.WebApp;
 				if (webApp) {
 					setWebAppInfo({
 						version: webApp.version,

@@ -6,7 +6,6 @@ declare global {
 		Telegram?: {
 			WebApp?: any;
 		};
-		WebApp?: any;
 	}
 }
 
@@ -25,7 +24,7 @@ export const detectPlatform = (): AppPlatform => {
 	if (RNPlatform.OS === 'web') {
 		if (typeof window !== 'undefined') {
 			// Проверяем оба возможных места расположения WebApp
-			const tgWebApp = window.Telegram?.WebApp || window.WebApp;
+			const tgWebApp = window.Telegram?.WebApp;
 			if (tgWebApp) return 'tgWeb';
 
 			const userAgent = window.navigator.userAgent.toLowerCase();
