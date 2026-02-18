@@ -37,11 +37,11 @@ const InitialLayout = () => {
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
-			<Stack.Protected guard={isAuth}>
+			<Stack.Protected guard={true}>
 				<Stack.Screen name='(tabs)' />
 			</Stack.Protected>
 
-			<Stack.Protected guard={!isAuth}>
+			<Stack.Protected guard={!true}>
 				<Stack.Screen name='(auth)' />
 			</Stack.Protected>
 
