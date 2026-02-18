@@ -7,6 +7,15 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+declare global {
+	interface Window {
+		WebApp?: any;
+		Telegram?: {
+			WebApp?: any;
+		};
+	}
+}
+
 export default function DebugTgInfo() {
 	const {
 		tgInitialized,
