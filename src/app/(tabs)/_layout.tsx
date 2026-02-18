@@ -16,7 +16,7 @@ export default function TabsLayout() {
 			<Tabs.Screen
 				name='index'
 				options={{
-					title: 'Главная',
+					title: '',
 					tabBarIcon: ({ color }) => (
 						<IconSymbol
 							size={28}
@@ -29,7 +29,7 @@ export default function TabsLayout() {
 			<Tabs.Screen
 				name='debug'
 				options={{
-					title: 'tg debug',
+					title: '',
 					tabBarIcon: ({ color }) => (
 						<IconSymbol
 							size={28}
