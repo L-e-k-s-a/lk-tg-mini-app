@@ -1,3 +1,4 @@
+import TgAuthScreen from '@/app/(telegram)/tg';
 import { Button, Typography } from '@/shared';
 import { useMe } from '@/shared/api';
 import { Colors } from '@/shared/constants/theme';
@@ -22,6 +23,7 @@ export default function HomeScreenTab() {
 
 	return (
 		<MainLayout>
+			<TgAuthScreen />
 			<View style={styles.section}>
 				<Typography
 					variant='h1'
