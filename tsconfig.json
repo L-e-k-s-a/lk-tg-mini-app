@@ -11,13 +11,7 @@
 			"@/entities/*": ["./src/entities/*"],
 			"@/shared/*": ["./src/shared/*"]
 		},
-		"typeRoots": ["./node_modules/@types", "./src/shared/types"]
+		"typeRoots": ["./node_modules/@types"]
 	},
-	"include": [
-		"**/*.ts",
-		"**/*.tsx",
-		".expo/types/**/*.ts",
-		"expo-env.d.ts",
-		"./src/shared/types/**/*.d.ts"
-	]
+	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }

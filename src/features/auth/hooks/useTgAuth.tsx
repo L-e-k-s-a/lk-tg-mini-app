@@ -2,6 +2,15 @@
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
+declare global {
+	interface Window {
+		WebApp?: any;
+		Telegram?: {
+			WebApp?: any;
+		};
+	}
+}
+
 export const useTgAuth = () => {
 	const [tgInitialized, setTgInitialized] = useState(false);
 	const [tgUser, setTgUser] = useState<any | null>(null);
@@ -68,17 +77,8 @@ export const useTgAuth = () => {
 			setTgUser(user);
 		}
 
-		if (webApp.themeParams) {
-			applyTgTheme(webApp.themeParams);
-		}
-
 		webApp.ready();
 		console.log('Telegram WebApp инициализирован');
-	};
-
-	const applyTgTheme = (themeParams: any) => {
-		// Ваша логика применения темы
-		console.log('Применяем тему:', themeParams);
 	};
 
 	return {

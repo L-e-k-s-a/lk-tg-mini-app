@@ -10,7 +10,7 @@ export default function TabsLayout() {
 				tabBarActiveTintColor: Colors.tint,
 				headerShown: false,
 				tabBarStyle: {
-					minHeight: 40,
+					minHeight: 50,
 				},
 			}}>
 			<Tabs.Screen
