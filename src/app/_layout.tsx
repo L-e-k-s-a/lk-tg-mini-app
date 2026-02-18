@@ -1,28 +1,10 @@
-import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
-import { Loader } from '@/shared';
 import { AppDefaultTheme } from '@/shared/constants/theme';
 import { ApolloProvider, AppContextProvider } from '@/shared/lib';
 import { ThemeProvider } from '@react-navigation/native';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { Platform, Text, View } from 'react-native';
-
-const TGInitializer = ({ children }: { children: React.ReactNode }) => {
-	const { tgInitialized, isTgEnvironment } = useTgAuth();
-
-	// Показываем загрузку пока MAX инициализируется
-	if (isTgEnvironment && !tgInitialized) {
-		return (
-			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-				<Loader />
-				<Text style={{ marginTop: 10 }}>Подключение к TG...</Text>
-			</View>
-		);
-	}
-
-	return <>{children}</>;
-};
+import { Platform } from 'react-native';
 
 const InitialLayout = () => {
 	// const { isAuth, loading, checkAuth } = useAuthStore();
@@ -39,7 +21,7 @@ const InitialLayout = () => {
 				<Stack.Screen name='(tabs)' />
 			</Stack.Protected>
 
-			<Stack.Protected guard={!false}>
+			<Stack.Protected guard={true}>
 				<Stack.Screen name='(debug)' />
 			</Stack.Protected>
 
@@ -63,9 +45,8 @@ export default function RootLayout() {
 		<ApolloProvider>
 			<AppContextProvider>
 				<ThemeProvider value={AppDefaultTheme}>
-					<TGInitializer>
-						<InitialLayout />
-					</TGInitializer>
+					<InitialLayout />
+
 					<StatusBar style='auto' />
 				</ThemeProvider>
 			</AppContextProvider>
