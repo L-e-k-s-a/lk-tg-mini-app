@@ -1,4 +1,3 @@
-// components/DebugTgInfo.tsx
 import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
 import { Button } from '@/shared';
 import { Colors } from '@/shared/constants/theme';
@@ -11,10 +10,11 @@ export default function DebugTgInfo() {
 	const {
 		tgInitialized,
 		tgUser,
-		isTgEnvironment,
-		platform,
-		isMobile,
 		isLoading,
+		platform,
+		platformName,
+		isTg,
+		isMobile,
 		userAgent,
 	} = useTgAuth();
 
@@ -40,13 +40,12 @@ export default function DebugTgInfo() {
 		return () => clearInterval(interval);
 	}, []);
 
-	// Тестовая функция для проверки определения
 	const testDetection = () => {
 		Alert.alert(
 			'Информация об устройстве',
-			`Platform: ${platform}\n` +
-				`isMobile: ${isMobile}\n` +
-				`isTgEnvironment: ${isTgEnvironment}\n` +
+			`Платформа: ${platform} (${platformName})\n` +
+				`Telegram: ${isTg ? '✅' : '❌'}\n` +
+				`Мобильное: ${isMobile ? '✅' : '❌'}\n` +
 				`UserAgent: ${userAgent}`,
 		);
 	};
@@ -69,14 +68,20 @@ export default function DebugTgInfo() {
 				<View style={styles.section}>
 					<Text style={styles.sectionTitle}>Статус:</Text>
 					<Text>Инициализирован: {tgInitialized ? '✅' : '⏳'}</Text>
-					<Text>Среда TG: {isTgEnvironment ? '✅' : '❌'}</Text>
-					<Text>Платформа: {platform}</Text>
+					<Text>Среда TG: {isTg ? '✅' : '❌'}</Text>
+					<Text>
+						Платформа: {platform} ({platformName})
+					</Text>
 					<Text>Мобильное устройство: {isMobile ? '✅' : '❌'}</Text>
 				</View>
 
 				<View style={styles.section}>
 					<Text style={styles.sectionTitle}>📱 Информация об устройстве:</Text>
-					<Text>User Agent: {userAgent}</Text>
+					<Text
+						style={styles.userAgentText}
+						numberOfLines={3}>
+						User Agent: {userAgent}
+					</Text>
 					<Button
 						title='Тест определения'
 						onPress={testDetection}
@@ -111,9 +116,7 @@ export default function DebugTgInfo() {
 				<Button
 					style={styles.buttonBack}
 					title='Вернуться назад'
-					onPress={() => {
-						router.replace('/');
-					}}
+					onPress={() => router.replace('/')}
 					variant='primary'
 				/>
 			</ScrollView>
@@ -152,5 +155,10 @@ const styles = StyleSheet.create({
 	},
 	testButton: {
 		marginTop: 10,
+	},
+	userAgentText: {
+		fontSize: 12,
+		marginBottom: 10,
+		color: '#666',
 	},
 });
