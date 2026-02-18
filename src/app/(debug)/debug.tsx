@@ -1,5 +1,7 @@
 // components/DebugTgInfo.tsx
 import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
+import { Button } from '@/shared';
+import { router } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -46,6 +48,14 @@ export default function DebugTgInfo() {
 					<Text>Цветовая схема: {window.WebApp.colorScheme}</Text>
 				</View>
 			)}
+			<Button
+				style={styles.buttonBack}
+				title='Вернуться назад'
+				onPress={() => {
+					router.replace('/');
+				}}
+				variant='primary'
+			/>
 		</ScrollView>
 	);
 }
@@ -76,5 +86,8 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '600',
 		marginBottom: 10,
+	},
+	buttonBack: {
+		marginTop: 20,
 	},
 });
