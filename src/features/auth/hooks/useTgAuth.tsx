@@ -87,12 +87,6 @@ export const useTgAuth = () => {
 	};
 
 	const loadTgScript = () => {
-		// Проверяем, не в Telegram ли мы (для надежности)
-		if (isTgPlatform(platform)) {
-			console.log('Уже в Telegram, скрипт не загружаем');
-			return;
-		}
-
 		const script = document.createElement('script');
 		script.src = 'https://telegram.org/js/telegram-web-app.js?59';
 		script.async = true;
