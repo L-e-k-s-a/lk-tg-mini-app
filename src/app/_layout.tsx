@@ -29,9 +29,9 @@ const MaxInitializer = ({ children }: { children: React.ReactNode }) => {
 const InitialLayout = () => {
 	const { isAuth, loading, checkAuth } = useAuthStore();
 
-	useEffect(() => {
-		checkAuth();
-	}, []);
+	// useEffect(() => {
+	// 	checkAuth();
+	// }, []);
 
 	if (loading) return <Loader />;
 
