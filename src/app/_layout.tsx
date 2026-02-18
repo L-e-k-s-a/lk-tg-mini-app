@@ -1,4 +1,3 @@
-import { useAuthStore } from '@/features';
 import { useMaxAuth } from '@/features/auth/hooks/useMaxAuth';
 import { Loader } from '@/shared';
 import { AppDefaultTheme } from '@/shared/constants/theme';
@@ -37,12 +36,12 @@ const InitialLayout = () => {
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
-			<Stack.Protected guard={true}>
+			<Stack.Protected guard={false}>
 				<Stack.Screen name='(tabs)' />
 			</Stack.Protected>
 
-			<Stack.Protected guard={!true}>
-				<Stack.Screen name='(max)' />
+			<Stack.Protected guard={!false}>
+				<Stack.Screen name='(tg)' />
 			</Stack.Protected>
 
 			<Stack.Screen name='+not-found' />
