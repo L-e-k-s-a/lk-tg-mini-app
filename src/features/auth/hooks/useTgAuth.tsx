@@ -16,25 +16,12 @@ export const useTgAuth = () => {
 	const [tgUser, setTgUser] = useState<any | null>(null);
 
 	useEffect(() => {
-		if (Platform.OS === 'web' && typeof window !== 'undefined') {
+		if (typeof window !== 'undefined') {
 			loadTgScript();
 		}
 	}, []);
 
 	const loadTgScript = () => {
-		// Проверяем через Telegram объект
-		if (window.Telegram?.WebApp) {
-			handleTgInit(window.Telegram.WebApp);
-			return;
-		}
-
-		// Альтернативная проверка
-		if (window.WebApp) {
-			handleTgInit(window.WebApp);
-			return;
-		}
-
-		// Подключаем скрипт
 		const script = document.createElement('script');
 		script.src = 'https://telegram.org/js/telegram-web-app.js?59';
 		script.async = true;
