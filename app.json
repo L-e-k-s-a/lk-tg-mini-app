@@ -25,12 +25,7 @@
 		"web": {
 			"output": "static",
 			"favicon": "./src/shared/assets/logos/logo.png",
-			"bundler": "metro",
-			"build": {
-				"babel": {
-					"include": ["@ui-kitten/components"]
-				}
-			}
+			"bundler": "metro"
 		},
 
 		"plugins": [
