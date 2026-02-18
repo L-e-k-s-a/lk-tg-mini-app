@@ -34,7 +34,7 @@ const TGInitializer = ({ children }: { children: React.ReactNode }) => {
 		return (
 			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 				<Loader />
-				<Text style={{ marginTop: 10 }}>Подключение к MAX...</Text>
+				<Text style={{ marginTop: 10 }}>Подключение к TG...</Text>
 			</View>
 		);
 	}
