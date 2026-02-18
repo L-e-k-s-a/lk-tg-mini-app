@@ -2,6 +2,7 @@ import { useTgAuth } from "@/features/auth/hooks/useTgAuth";
 import { View, Text } from "react-native";
 import { ActivityIndicator, StyleSheet } from "react-native";
 import { Colors } from '@/shared/constants/theme';
+import { Button } from "@/shared";
 
 export default function TgAuthScreen(){
     const {tgInitialized, tgUser, isTgEnvironment} = useTgAuth()
@@ -20,8 +21,14 @@ export default function TgAuthScreen(){
 
     const tg = (window as any).Telegram?.WebApp
 
+    if(tg){
+      console.log(tg.initDataUnsafe)
+    }else{
+      console.log("Что-то пошло не так")
+    }
+
     return(
-      <View>
+      <View> 
         <Text>Start tg</Text>
         <Text>{tg.initDataUnsafe}</Text>
       </View>
