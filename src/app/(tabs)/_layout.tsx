@@ -9,11 +9,14 @@ export default function TabsLayout() {
 			screenOptions={{
 				tabBarActiveTintColor: Colors.tint,
 				headerShown: false,
+				tabBarStyle: {
+					minHeight: 40,
+				},
 			}}>
 			<Tabs.Screen
 				name='index'
 				options={{
-					title: '',
+					title: 'Главная',
 					tabBarIcon: ({ color }) => (
 						<IconSymbol
 							size={28}
@@ -26,7 +29,7 @@ export default function TabsLayout() {
 			<Tabs.Screen
 				name='debug'
 				options={{
-					title: '',
+					title: 'tg',
 					tabBarIcon: ({ color }) => (
 						<IconSymbol
 							size={28}
