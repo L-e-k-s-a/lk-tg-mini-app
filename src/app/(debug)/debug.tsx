@@ -31,6 +31,7 @@ export default function DebugTgInfo() {
 					<Text>
 						Имя: {tgUser.first_name} {tgUser.last_name || ''}
 					</Text>
+					<Text>Номер телефона: {tgUser.phone || 'не указан'}</Text>
 					<Text>Username: @{tgUser.username || 'не указан'}</Text>
 					<Text>Язык: {tgUser.language_code || 'не указан'}</Text>
 					<Text>Премиум: {tgUser.is_premium ? '✅' : '❌'}</Text>
