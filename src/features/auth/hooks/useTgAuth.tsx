@@ -1,4 +1,5 @@
 // features/max/hooks/useMaxAuth.ts
+import { detectPlatform } from '@/shared/lib/platform/get-platform';
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
@@ -14,9 +15,12 @@ declare global {
 export const useTgAuth = () => {
 	const [tgInitialized, setTgInitialized] = useState(false);
 	const [tgUser, setTgUser] = useState<any | null>(null);
-
+	const PLATFORM = detectPlatform();
 	useEffect(() => {
-		if (Platform.OS === 'web' && typeof window !== 'undefined') {
+		if (
+			(PLATFORM === 'tgWeb' || PLATFORM === 'tgMobile') &&
+			typeof window !== 'undefined'
+		) {
 			loadTgScript();
 		}
 	}, []);
