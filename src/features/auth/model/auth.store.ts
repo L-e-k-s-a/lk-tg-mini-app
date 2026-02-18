@@ -1,8 +1,8 @@
 import { parseGroups } from '@/entities/user/lib/parse-groups';
 import { User } from '@/entities/user/model/user.model';
+import { telegramAuth } from '@/features/auth/api/telegram-auth';
 import { http } from '@/shared/api/http/http';
 import { secureStorage } from '@/shared/lib';
-import { detectPlatform } from '@/shared/lib/platform/get-platform';
 import { create } from 'zustand';
 
 type AuthState = {
@@ -27,11 +27,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 		set({ loading: true });
 
 		try {
-			const response: any = await http.post('/auth/telegram', { initData });
+			const { access_token, refresh_token, user } =
+				await telegramAuth(initData);
 
-			const { access_token, user } = response;
-
-			// сохраняем токен
 			secureStorage.setItem('access_token', access_token);
 
 			set({
@@ -60,25 +58,34 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 	checkAuth: async () => {
 		set({ loading: true, error: undefined });
-		try {
-			const PLATFORM = detectPlatform();
-			if (PLATFORM === 'web') {
-				const user = await http.get<User>('/userinfo');
-				set({
-					user,
-					groups: parseGroups(user.groups),
-					isAuth: true,
-					loading: false,
-				});
 
+		try {
+			const token = await secureStorage.getItem('access_token');
+
+			if (!token) {
+				set({ isAuth: false, loading: false });
 				return;
 			}
 
-			throw new Error('Unknown platform');
-		} catch (err: any) {
-			console.log('[Auth] error:', err.message);
-			set({ isAuth: false, loading: false });
+			const user = await http.get<User>('/userinfo');
+
+			set({
+				user,
+				groups: parseGroups(user.groups),
+				isAuth: true,
+				loading: false,
+			});
+		} catch (error: any) {
+			console.log('[Auth check failed]', error.message);
+
 			secureStorage.clearAll();
+
+			set({
+				user: null,
+				groups: [],
+				isAuth: false,
+				loading: false,
+			});
 		}
 	},
 }));
