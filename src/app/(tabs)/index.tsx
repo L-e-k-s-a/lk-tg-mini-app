@@ -1,25 +1,10 @@
 import { Button, Typography } from '@/shared';
-import { useMe } from '@/shared/api';
 import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
-import { ErrorView } from '@/widgets/error-view';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 export default function HomeScreenTab() {
-	const me = useMe();
-	console.log('me', me);
-	const error = false;
-	if (error) {
-		return (
-			<ErrorView
-				error={{
-					message: 'ошибка при запросе',
-				}}
-			/>
-		);
-	}
-
 	return (
 		<MainLayout>
 			<View style={styles.section}>

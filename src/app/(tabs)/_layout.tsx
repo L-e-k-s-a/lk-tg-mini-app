@@ -26,6 +26,19 @@ export default function TabsLayout() {
 					),
 				}}
 			/>
+			<Tabs.Screen
+				name='debug'
+				options={{
+					title: 'tg debug',
+					tabBarIcon: ({ color }) => (
+						<IconSymbol
+							size={28}
+							name={'ant.fill'}
+							color={color}
+						/>
+					),
+				}}
+			/>
 		</Tabs>
 	);
 }

@@ -26,6 +26,7 @@ const MAPPING = {
 	'envelope.fill': 'mail',
 	'books.vertical.fill': 'menu-book',
 	'exclamationmark.triangle.fill': 'error',
+	'ant.fill': 'bug-report',
 } as IconMapping;
 
 /**

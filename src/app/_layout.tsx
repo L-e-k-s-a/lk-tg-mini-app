@@ -17,11 +17,11 @@ const InitialLayout = () => {
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
-			<Stack.Protected guard={false}>
+			<Stack.Protected guard={true}>
 				<Stack.Screen name='(tabs)' />
 			</Stack.Protected>
 
-			<Stack.Protected guard={true}>
+			<Stack.Protected guard={!true}>
 				<Stack.Screen name='(debug)' />
 			</Stack.Protected>
 
@@ -46,7 +46,6 @@ export default function RootLayout() {
 			<AppContextProvider>
 				<ThemeProvider value={AppDefaultTheme}>
 					<InitialLayout />
-
 					<StatusBar style='auto' />
 				</ThemeProvider>
 			</AppContextProvider>
