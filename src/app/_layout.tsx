@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/features/auth';
 import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
+import { Loader } from '@/shared';
 import { AppDefaultTheme } from '@/shared/constants/theme';
 import { ApolloProvider, AppContextProvider } from '@/shared/lib';
 import { ThemeProvider } from '@react-navigation/native';
@@ -33,7 +34,7 @@ const InitialLayout = () => {
 	// 	tryTelegramLogin();
 	// }, [tgInitialized]);
 
-	// if (isLoading || loading || !telegramChecked) return <Loader />;
+	if (isLoading) return <Loader />;
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
