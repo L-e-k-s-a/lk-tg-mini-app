@@ -1,6 +1,7 @@
 // components/DebugTgInfo.tsx
 import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
 import { Button } from '@/shared';
+import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
 import { router } from 'expo-router';
 import React from 'react';
@@ -67,7 +68,6 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
-		backgroundColor: '#f5f5f5',
 	},
 	title: {
 		fontSize: 20,
@@ -75,11 +75,11 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	section: {
-		backgroundColor: 'white',
+		backgroundColor: Colors.background,
 		padding: 15,
 		borderRadius: 10,
 		marginBottom: 15,
-		shadowColor: '#000',
+		shadowColor: Colors.black,
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.1,
 		shadowRadius: 4,
