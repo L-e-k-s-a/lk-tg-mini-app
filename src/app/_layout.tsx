@@ -21,9 +21,9 @@ const InitialLayout = () => {
 				<Stack.Screen name='(tabs)' />
 			</Stack.Protected>
 
-			<Stack.Protected guard={!true}>
-				<Stack.Screen name='(debug)' />
-			</Stack.Protected>
+			{/* <Stack.Protected guard={!true}>
+				<Stack.Screen name='(auth)' />
+			</Stack.Protected> */}
 
 			<Stack.Screen name='+not-found' />
 		</Stack>
