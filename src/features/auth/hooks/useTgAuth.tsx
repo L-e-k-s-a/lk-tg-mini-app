@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 
 declare global {
 	interface Window {
-		WebApp?: any;
 		Telegram?: {
 			WebApp?: any;
 		};
@@ -25,7 +24,7 @@ export const useTgAuth = () => {
 
 	const detectPlatform = () => {
 		// Пробуем получить платформу из WebApp
-		const webApp = window.Telegram?.WebApp || window.WebApp;
+		const webApp = window.Telegram?.WebApp;
 		if (webApp?.platform && webApp.platform !== 'unknown') {
 			return webApp.platform;
 		}
@@ -68,7 +67,7 @@ export const useTgAuth = () => {
 
 	const initializeTgWebApp = () => {
 		// Проверяем разные варианты доступа к WebApp
-		const webApp = window.Telegram?.WebApp || window.WebApp;
+		const webApp = window.Telegram?.WebApp;
 
 		if (webApp) {
 			console.log('Telegram WebApp найден:', {
@@ -96,7 +95,7 @@ export const useTgAuth = () => {
 				let attempts = 0;
 				const checkInterval = setInterval(() => {
 					attempts++;
-					const retryWebApp = window.Telegram?.WebApp || window.WebApp;
+					const retryWebApp = window.Telegram?.WebApp;
 
 					if (retryWebApp) {
 						console.log(
@@ -132,7 +131,7 @@ export const useTgAuth = () => {
 		script.onload = () => {
 			console.log('Tg Bridge loaded');
 			setTimeout(() => {
-				const webApp = window.Telegram?.WebApp || window.WebApp;
+				const webApp = window.Telegram?.WebApp;
 				if (webApp) {
 					handleTgInit(webApp);
 				} else {
@@ -210,7 +209,7 @@ export const useTgAuth = () => {
 		if (typeof window === 'undefined') return false;
 
 		// Проверяем наличие WebApp
-		const hasWebApp = !!(window.Telegram?.WebApp || window.WebApp);
+		const hasWebApp = !!window.Telegram?.WebApp;
 
 		// Проверяем user-agent
 		const userAgent = navigator.userAgent || '';
