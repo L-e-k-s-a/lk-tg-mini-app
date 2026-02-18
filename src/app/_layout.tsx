@@ -27,13 +27,13 @@ const MaxInitializer = ({ children }: { children: React.ReactNode }) => {
 };
 
 const InitialLayout = () => {
-	const { isAuth, loading, checkAuth } = useAuthStore();
+	// const { isAuth, loading, checkAuth } = useAuthStore();
 
 	// useEffect(() => {
 	// 	checkAuth();
 	// }, []);
 
-	if (loading) return <Loader />;
+	// if (loading) return <Loader />;
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
