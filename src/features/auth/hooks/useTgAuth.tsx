@@ -1,6 +1,5 @@
 // features/max/hooks/useMaxAuth.ts
 import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 
 declare global {
 	interface Window {
@@ -14,10 +13,19 @@ declare global {
 export const useTgAuth = () => {
 	const [tgInitialized, setTgInitialized] = useState(false);
 	const [tgUser, setTgUser] = useState<any | null>(null);
+	const [tgWebApp, setTgWebApp] = useState<any | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
-			loadTgScript();
+			// Проверяем, не загружен ли уже скрипт
+			if (window.Telegram?.WebApp || window.WebApp) {
+				const webApp = window.Telegram?.WebApp || window.WebApp;
+				handleTgInit(webApp);
+				setIsLoading(false);
+			} else {
+				loadTgScript();
+			}
 		}
 	}, []);
 
@@ -28,26 +36,28 @@ export const useTgAuth = () => {
 
 		script.onload = () => {
 			console.log('Tg Bridge loaded');
+			// Даем немного времени на инициализацию
 			setTimeout(() => {
-				if (window.Telegram?.WebApp) {
-					handleTgInit(window.Telegram.WebApp);
-				} else if (window.WebApp) {
-					handleTgInit(window.WebApp);
+				const webApp = window.Telegram?.WebApp || window.WebApp;
+				if (webApp) {
+					handleTgInit(webApp);
 				} else {
 					console.error('WebApp not found after script load');
 				}
-			}, 100);
+				setIsLoading(false);
+			}, 200);
 		};
 
 		script.onerror = () => {
 			console.error('Failed to load Tg Bridge');
+			setIsLoading(false);
 		};
 
 		document.head.appendChild(script);
 	};
 
 	const handleTgInit = (webApp: any) => {
-		// Используйте any или импортированный тип
+		setTgWebApp(webApp);
 		setTgInitialized(true);
 
 		const user = webApp.initDataUnsafe?.user;
@@ -58,20 +68,39 @@ export const useTgAuth = () => {
 		// Expand the WebApp to full height
 		webApp.expand();
 
-		// You can also check if it's expanded
-		console.log('Is expanded:', webApp.isExpanded);
-
-		// Get viewport height after expansion
-		console.log('Viewport height:', webApp.viewportHeight);
-
-		webApp.ready();
 		console.log('Telegram WebApp инициализирован');
+		console.log('Platform:', webApp.platform);
+		console.log('Version:', webApp.version);
+	};
+
+	// Функция для получения платформы с проверкой
+	const getPlatform = () => {
+		if (tgWebApp?.platform) {
+			return tgWebApp.platform;
+		}
+
+		// Попытка получить платформу из глобального объекта
+		const webApp = window.Telegram?.WebApp || window.WebApp;
+		return webApp?.platform || 'unknown';
+	};
+
+	// Функция для определения мобильного устройства
+	const isMobile = () => {
+		const platform = getPlatform();
+		return (
+			platform === 'ios' || platform === 'android' || platform === 'mobile'
+		);
 	};
 
 	return {
 		tgInitialized,
 		tgUser,
+		tgWebApp,
+		isLoading,
 		isTgEnvironment:
-			Platform.OS === 'web' && (!!window.Telegram?.WebApp || !!window.WebApp),
+			typeof window !== 'undefined' &&
+			(!!window.Telegram?.WebApp || !!window.WebApp || tgInitialized),
+		platform: getPlatform(),
+		isMobile: isMobile(),
 	};
 };

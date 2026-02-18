@@ -4,17 +4,59 @@ import { Button } from '@/shared';
 import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function DebugTgInfo() {
-	const { tgInitialized, tgUser, isTgEnvironment } = useTgAuth();
+	const {
+		tgInitialized,
+		tgUser,
+		isTgEnvironment,
+		platform,
+		isMobile,
+		isLoading,
+	} = useTgAuth();
+	const [webAppInfo, setWebAppInfo] = useState<any>(null);
+
+	useEffect(() => {
+		// Периодически проверяем обновление данных WebApp
+		const interval = setInterval(() => {
+			if (typeof window !== 'undefined') {
+				const webApp = window.Telegram?.WebApp || window.WebApp;
+				if (webApp) {
+					setWebAppInfo({
+						version: webApp.version,
+						platform: webApp.platform,
+						colorScheme: webApp.colorScheme,
+						isExpanded: webApp.isExpanded,
+						viewportHeight: webApp.viewportHeight,
+						viewportStableHeight: webApp.viewportStableHeight,
+					});
+				}
+			}
+		}, 1000);
+
+		return () => clearInterval(interval);
+	}, []);
+
+	if (isLoading) {
+		return (
+			<MainLayout>
+				<View style={styles.container}>
+					<Text style={styles.title}>⏳ Загрузка Telegram WebApp...</Text>
+				</View>
+			</MainLayout>
+		);
+	}
 
 	if (!isTgEnvironment) {
 		return (
-			<View style={styles.container}>
-				<Text style={styles.title}>❌ Не в среде Telegram</Text>
-			</View>
+			<MainLayout>
+				<View style={styles.container}>
+					<Text style={styles.title}>❌ Не в среде Telegram</Text>
+					<Text>Откройте это приложение через Telegram Mini App</Text>
+				</View>
+			</MainLayout>
 		);
 	}
 
@@ -27,30 +69,33 @@ export default function DebugTgInfo() {
 					<Text style={styles.sectionTitle}>Статус:</Text>
 					<Text>Инициализирован: {tgInitialized ? '✅' : '⏳'}</Text>
 					<Text>Среда TG: {isTgEnvironment ? '✅' : '❌'}</Text>
+					<Text>Платформа: {platform || 'не определена'}</Text>
+					<Text>Мобильное устройство: {isMobile ? '✅' : '❌'}</Text>
 				</View>
+
+				{webAppInfo && (
+					<View style={styles.section}>
+						<Text style={styles.sectionTitle}>🌐 WebApp данные:</Text>
+						<Text>Версия: {webAppInfo.version}</Text>
+						<Text>Платформа: {webAppInfo.platform}</Text>
+						<Text>Цветовая схема: {webAppInfo.colorScheme}</Text>
+						<Text>Развернут: {webAppInfo.isExpanded ? '✅' : '❌'}</Text>
+						<Text>Высота: {webAppInfo.viewportHeight}</Text>
+					</View>
+				)}
 
 				{tgUser && (
 					<View style={styles.section}>
 						<Text style={styles.sectionTitle}>👤 Пользователь:</Text>
 						<Text>ID: {tgUser.id}</Text>
 						<Text>
-							Имя: {tgUser.first_name} {tgUser.last_name || ''}
+							Имя: {tgUser.first_name} {tgUser.last_user || ''}
 						</Text>
-						<Text>Номер телефона: {tgUser.phone || 'не указан'}</Text>
 						<Text>Username: @{tgUser.username || 'не указан'}</Text>
 						<Text>Язык: {tgUser.language_code || 'не указан'}</Text>
-						<Text>Премиум: {tgUser.is_premium ? '✅' : '❌'}</Text>
 					</View>
 				)}
 
-				{typeof window !== 'undefined' && window?.Telegram?.WebApp && (
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>🌐 WebApp данные:</Text>
-						<Text>Версия: {window?.Telegram?.WebApp?.version}</Text>
-						<Text>Платформа: {window?.Telegram?.WebApp?.platform}</Text>
-						<Text>Цветовая схема: {window?.Telegram?.WebApp?.colorScheme}</Text>
-					</View>
-				)}
 				<Button
 					style={styles.buttonBack}
 					title='Вернуться назад'
