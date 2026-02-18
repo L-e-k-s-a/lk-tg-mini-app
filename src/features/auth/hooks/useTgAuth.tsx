@@ -31,10 +31,8 @@ export const useTgAuth = () => {
 
 		// Определяем по user-agent
 		const userAgent = navigator.userAgent || '';
-		const vendor = navigator.vendor || '';
 
 		console.log('User Agent:', userAgent);
-		console.log('Vendor:', vendor);
 
 		// iOS detection
 		if (/iPhone|iPad|iPod/.test(userAgent)) {
