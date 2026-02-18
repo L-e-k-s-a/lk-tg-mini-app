@@ -63,17 +63,8 @@ export const useTgAuth = () => {
 		// Используйте any или импортированный тип
 		setTgInitialized(true);
 
-		// Подробное логирование
-		console.log('Telegram WebApp данные:', {
-			initData: webApp.initData,
-			initDataUnsafe: webApp.initDataUnsafe,
-			version: webApp.version,
-			platform: webApp.platform,
-		});
-
 		const user = webApp.initDataUnsafe?.user;
 		if (user) {
-			console.log('Пользователь TG:', user);
 			setTgUser(user);
 		}
 
