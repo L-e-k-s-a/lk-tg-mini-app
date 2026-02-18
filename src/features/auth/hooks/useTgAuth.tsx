@@ -1,7 +1,6 @@
 // features/max/hooks/useMaxAuth.ts
 import { detectPlatform } from '@/shared/lib/platform/get-platform';
 import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 
 declare global {
 	interface Window {
@@ -80,6 +79,7 @@ export const useTgAuth = () => {
 		tgInitialized,
 		tgUser,
 		isTgEnvironment:
-			Platform.OS === 'web' && (!!window.Telegram?.WebApp || !!window.WebApp),
+			(PLATFORM === 'tgWeb' || PLATFORM === 'tgMobile') &&
+			(!!window.Telegram?.WebApp || !!window.WebApp),
 	};
 };
