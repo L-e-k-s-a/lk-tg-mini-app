@@ -68,6 +68,15 @@ export const useTgAuth = () => {
 			setTgUser(user);
 		}
 
+		// Expand the WebApp to full height
+		webApp.expand();
+
+		// You can also check if it's expanded
+		console.log('Is expanded:', webApp.isExpanded);
+
+		// Get viewport height after expansion
+		console.log('Viewport height:', webApp.viewportHeight);
+
 		webApp.ready();
 		console.log('Telegram WebApp инициализирован');
 	};
