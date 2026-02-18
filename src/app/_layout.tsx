@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/features/auth';
 import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
+import { useMe } from '@/shared/api';
 import { AppDefaultTheme } from '@/shared/constants/theme';
 import { ApolloProvider, AppContextProvider } from '@/shared/lib';
 import { ThemeProvider } from '@react-navigation/native';
@@ -12,7 +13,8 @@ const InitialLayout = () => {
 	const { isAuth, loading, loginWithTelegram } = useAuthStore();
 	const { tgWebApp, tgInitialized, isLoading } = useTgAuth();
 	const [telegramChecked, setTelegramChecked] = useState(false);
-
+	const me = useMe();
+	console.log('me', me);
 	// useEffect(() => {
 	// 	const tryTelegramLogin = async () => {
 	// 		if (!tgInitialized) return;
