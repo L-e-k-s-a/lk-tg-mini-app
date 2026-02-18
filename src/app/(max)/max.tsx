@@ -76,7 +76,7 @@ export default function MaxAuthScreen() {
 					</Text>
 					<TouchableOpacity
 						style={styles.altButton}
-						onPress={() => router.push('/(auth)/login')}>
+						onPress={() => router.push('/(tabs)')}>
 						<Text style={styles.altButtonText}>Обычный вход</Text>
 					</TouchableOpacity>
 				</View>
