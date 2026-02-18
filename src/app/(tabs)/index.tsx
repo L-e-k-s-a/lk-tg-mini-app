@@ -1,4 +1,5 @@
-import { Button, Typography } from '@/shared';
+import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
+import { Button, Loader, Typography } from '@/shared';
 import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
 import { ErrorView } from '@/widgets/error-view';
@@ -6,7 +7,13 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 export default function HomeScreenTab() {
+	const { isLoading } = useTgAuth();
 	const error = false;
+
+	if (isLoading) {
+		return <Loader />;
+	}
+
 	if (error) {
 		return (
 			<ErrorView
