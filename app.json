@@ -17,14 +17,14 @@
 		"android": {
 			"package": "com.tsu.mobile",
 			"adaptiveIcon": {
-				"foregroundImage": "./src/shared/assets/logos/logo.png",
+				"foregroundImage": "./src/shared/assets/logos/favicon.png",
 				"backgroundColor": "#E6F4FE"
 			}
 		},
 
 		"web": {
 			"output": "static",
-			"favicon": "./src/shared/assets/logos/logo.png",
+			"favicon": "./src/shared/assets/logos/favicon.png",
 			"bundler": "metro"
 		},
 
