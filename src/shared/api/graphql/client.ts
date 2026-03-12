@@ -1,19 +1,34 @@
 import { EndPoints, isDev } from '@/shared/constants/base';
-import { ApolloClient, InMemoryCache } from '@apollo/client';
-
-import { ApolloLink, HttpLink, split } from '@apollo/client';
-
+import {
+	ApolloClient,
+	ApolloLink,
+	HttpLink,
+	InMemoryCache,
+	split,
+} from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from 'graphql-ws';
+import { Platform } from 'react-native';
+
+const getCookie = (name: string) => {
+	const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+	return match ? decodeURIComponent(match[2]) : null;
+};
 
 export const getAccessToken = async (): Promise<Record<string, string>> => {
 	try {
-		console.log('SecureStore', SecureStore);
-		const token = await SecureStore.getItemAsync('access_token');
+		let token: string | null = null;
+
+		if (Platform.OS === 'web') {
+			token = getCookie('access_token');
+		} else {
+			token = await SecureStore.getItemAsync('access_token');
+		}
+
 		return token ? { 'x-access-token': token } : {};
 	} catch (error) {
 		console.error('Failed to get access token', error);
@@ -39,17 +54,17 @@ const wsClient = createClient({
 
 const wsLink = new GraphQLWsLink(wsClient);
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-	if (graphQLErrors) {
-		graphQLErrors.forEach(({ message, locations, path }) => {
+const errorLink = onError(({ error }: any) => {
+	if (!error) return;
+
+	if ('errors' in error) {
+		error.errors.forEach(({ message, locations, path }: any) => {
 			console.error(
 				`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
 			);
 		});
-	}
-
-	if (networkError) {
-		console.error('[Network error]:', networkError);
+	} else {
+		console.error('[Network error]:', error);
 	}
 });
 
