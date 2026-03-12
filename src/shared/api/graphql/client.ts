@@ -1,5 +1,8 @@
 import { EndPoints, isDev } from '@/shared/constants/base';
-import { detectPlatform } from '@/shared/lib/platform/get-platform';
+import {
+	detectPlatform,
+	isTgPlatform,
+} from '@/shared/lib/platform/get-platform';
 import {
 	ApolloClient,
 	ApolloLink,
@@ -14,18 +17,17 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from 'graphql-ws';
 
-const getCookie = (name: string) => {
-	const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-	return match ? decodeURIComponent(match[2]) : null;
-};
-
+// Получение токена в зависимости от платформы
 export const getAccessToken = async (): Promise<Record<string, string>> => {
 	try {
 		let token: string | null = null;
 		const platform = detectPlatform();
-		if (platform === 'web') {
-			token = getCookie('access_token');
+
+		if (platform === 'web' || isTgPlatform(platform)) {
+			// Для веба и Telegram Web используем localStorage
+			token = localStorage.getItem('access_token');
 		} else {
+			// Для нативных платформ используем SecureStore
 			token = await SecureStore.getItemAsync('access_token');
 		}
 
@@ -36,11 +38,13 @@ export const getAccessToken = async (): Promise<Record<string, string>> => {
 	}
 };
 
+// HTTP link для обычных запросов
 const httpLink = new HttpLink({
 	uri: `${EndPoints.api}/graphql`,
-	credentials: 'include',
+	credentials: 'include', // можно оставить для cookie, если нужны
 });
 
+// WebSocket link для подписок
 const wsClient = createClient({
 	url: EndPoints.wss,
 	keepAlive: 10000,
@@ -54,20 +58,22 @@ const wsClient = createClient({
 
 const wsLink = new GraphQLWsLink(wsClient);
 
-const errorLink = onError(({ error }: any) => {
-	if (!error) return;
-
-	if ('errors' in error) {
-		error.errors.forEach(({ message, locations, path }: any) => {
+// Линк для обработки ошибок
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+	if (graphQLErrors) {
+		graphQLErrors.forEach(({ message, locations, path }) => {
 			console.error(
 				`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
 			);
 		});
-	} else {
-		console.error('[Network error]:', error);
+	}
+
+	if (networkError) {
+		console.error('[Network error]:', networkError);
 	}
 });
 
+// Линк для добавления токена в заголовки
 const authLink = setContext(async (_, { headers }) => {
 	const tokenHeaders = await getAccessToken();
 	return {
@@ -78,6 +84,7 @@ const authLink = setContext(async (_, { headers }) => {
 	};
 });
 
+// Разделение на WS для подписок и HTTP для запросов/мутаций
 const splitLink = split(
 	({ query }) => {
 		const definition = getMainDefinition(query);
@@ -90,11 +97,12 @@ const splitLink = split(
 	httpLink,
 );
 
+// Apollo Client
 export const apolloClient = new ApolloClient({
 	link: ApolloLink.from([errorLink, authLink, splitLink]),
 	cache: new InMemoryCache(),
 	queryDeduplication: false,
 	devtools: {
-		enabled: isDev ? true : false,
+		enabled: isDev,
 	},
 });
