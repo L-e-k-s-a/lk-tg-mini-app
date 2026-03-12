@@ -18,16 +18,24 @@ import * as SecureStore from 'expo-secure-store';
 import { createClient } from 'graphql-ws';
 
 // Получение токена в зависимости от платформы
+const getCookie = (name: string) => {
+	const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+	return match ? decodeURIComponent(match[2]) : null;
+};
+
 export const getAccessToken = async (): Promise<Record<string, string>> => {
 	try {
 		let token: string | null = null;
 		const platform = detectPlatform();
 
-		if (platform === 'web' || isTgPlatform(platform)) {
-			// Для веба и Telegram Web используем localStorage
+		if (platform === 'web') {
+			// Обычный веб-браузер — используем cookie
+			token = getCookie('access_token');
+		} else if (isTgPlatform(platform)) {
+			// Telegram Mini App — используем localStorage
 			token = localStorage.getItem('access_token');
 		} else {
-			// Для нативных платформ используем SecureStore
+			// Нативные платформы — SecureStore
 			token = await SecureStore.getItemAsync('access_token');
 		}
 
