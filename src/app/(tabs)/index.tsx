@@ -1,9 +1,17 @@
+import { Loader } from '@/shared';
+import { useMe } from '@/shared/api';
 import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
+import { ErrorView } from '@/widgets/error-view';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 
 export default function HomeScreenTab() {
+	const { data, loading, error } = useMe();
+	console.log('data', data);
+	if (loading) return <Loader />;
+
+	if (error) return <ErrorView error={error} />;
 	return (
 		<MainLayout>
 			<></>
