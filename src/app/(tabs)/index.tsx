@@ -1,9 +1,8 @@
-import { Button, Typography } from '@/shared';
 import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
 import { ErrorView } from '@/widgets/error-view';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export default function HomeScreenTab() {
 	const error = false;
@@ -19,7 +18,7 @@ export default function HomeScreenTab() {
 	}
 	return (
 		<MainLayout>
-			<View style={styles.section}>
+			{/* <View style={styles.section}>
 				<Typography
 					variant='h1'
 					style={styles.title}>
@@ -45,7 +44,8 @@ export default function HomeScreenTab() {
 					onPress={() => console.log('Clicked!')}
 					variant='secondary'
 				/>
-			</View>
+			</View> */}
+			<></>
 		</MainLayout>
 	);
 }
