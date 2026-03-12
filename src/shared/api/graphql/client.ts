@@ -1,8 +1,8 @@
+import { EndPoints, isDev } from '@/shared/constants/base';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 
 import { ApolloLink, HttpLink, split } from '@apollo/client';
 
-import { BASE_URL, DOMAIN, isDev } from '@/shared/constants/base';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
@@ -12,6 +12,7 @@ import { createClient } from 'graphql-ws';
 
 export const getAccessToken = async (): Promise<Record<string, string>> => {
 	try {
+		console.log('SecureStore', SecureStore);
 		const token = await SecureStore.getItemAsync('access_token');
 		return token ? { 'x-access-token': token } : {};
 	} catch (error) {
@@ -21,37 +22,22 @@ export const getAccessToken = async (): Promise<Record<string, string>> => {
 };
 
 const httpLink = new HttpLink({
-	uri: `${BASE_URL}/graphql`,
+	uri: `${EndPoints.api}/graphql`,
 	credentials: 'include',
 });
 
-const wsLink = new GraphQLWsLink(
-	createClient({
-		url: `wss://${DOMAIN}/graphql`,
-		keepAlive: 10_000,
-		shouldRetry(err) {
-			console.log('shouldRetry', err);
-			return true;
-		},
+const wsClient = createClient({
+	url: EndPoints.wss,
+	keepAlive: 10000,
+	on: {
+		connecting: () => console.log('WS connecting'),
+		connected: () => console.log('WS connected'),
+		closed: (e) => console.log('WS closed', e),
+		error: (e) => console.log('WS error', e),
+	},
+});
 
-		on: {
-			connected: (socket, payload) => {
-				console.log('connected:', socket);
-				console.log('payload:', payload);
-			},
-			ping: (recv) => {
-				console.log('ping', recv);
-			},
-			pong: (recv) => {
-				console.log('pong', recv);
-			},
-			error: (err: any) => {
-				console.error('Socket err', err.code);
-			},
-			closed: (err) => {},
-		},
-	}),
-);
+const wsLink = new GraphQLWsLink(wsClient);
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
 	if (graphQLErrors) {

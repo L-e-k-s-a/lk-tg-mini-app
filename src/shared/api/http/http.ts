@@ -4,7 +4,7 @@ export async function apiFetch<T>(
 	endpoint: string,
 	options: RequestInit = {},
 ): Promise<T> {
-	const url = `${BASE_URL}${endpoint}`;
+	const url = `${BASE_URL}/${endpoint}`;
 
 	const res = await fetch(url, {
 		credentials: 'include',
