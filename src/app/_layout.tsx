@@ -14,7 +14,7 @@ const InitialLayout = () => {
 	if (loading) return <Loader />;
 
 	if (error) return <ErrorView error={error} />;
-
+	console.log('data', data);
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
 			<Stack.Protected guard={!!data}>
