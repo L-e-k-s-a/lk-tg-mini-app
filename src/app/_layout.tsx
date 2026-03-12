@@ -13,15 +13,8 @@ const InitialLayout = () => {
 	const { data, loading, error } = useMe();
 	if (loading) return <Loader />;
 
-	if (error)
-		return (
-			<ErrorView
-				error={{
-					message: error.message,
-				}}
-			/>
-		);
-	console.log('data', data);
+	if (error) return <ErrorView error={error} />;
+
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
 			<Stack.Protected guard={!!data}>

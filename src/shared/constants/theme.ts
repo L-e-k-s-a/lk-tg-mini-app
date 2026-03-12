@@ -25,6 +25,8 @@ export const Colors = {
 	black: '#000',
 	error: '#A92B5E',
 	surface: '#E5E5EA',
+	warning: '#ffa94d',
+	info: '#f5f5f5',
 };
 
 export const Fonts = Platform.select({
