@@ -59,17 +59,17 @@ const wsClient = createClient({
 const wsLink = new GraphQLWsLink(wsClient);
 
 // Линк для обработки ошибок
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-	if (graphQLErrors) {
-		graphQLErrors.forEach(({ message, locations, path }) => {
+const errorLink = onError(({ error }: any) => {
+	if (!error) return;
+
+	if ('errors' in error) {
+		error.errors.forEach(({ message, locations, path }: any) => {
 			console.error(
 				`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
 			);
 		});
-	}
-
-	if (networkError) {
-		console.error('[Network error]:', networkError);
+	} else {
+		console.error('[Network error]:', error);
 	}
 });
 
