@@ -1,16 +1,15 @@
-// import Constants from 'expo-constants';
+import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 
-// const APP_ENV = (process.env.EXPO_PUBLIC_APP_ENV ??
-// 	Constants.expoConfig?.extra?.APP_ENV ??
-// 	'local') as 'local' | 'dev' | 'prod';
+const APP_ENV = (process.env.EXPO_PUBLIC_APP_ENV ??
+	Constants.expoConfig?.extra?.APP_ENV ??
+	'local') as 'local' | 'dev' | 'prod';
 
-// const DOMAIN =
-// 	process.env.EXPO_PUBLIC_API_DOMAIN ??
-// 	Constants.expoConfig?.extra?.API_DOMAIN ??
-// 	'localhost:9078';
-const DOMAIN: string = 'lk-dev.tsutmb.ru';
-const APP_ENV: string = 'dev';
+const DOMAIN =
+	process.env.EXPO_PUBLIC_API_DOMAIN ??
+	Constants.expoConfig?.extra?.API_DOMAIN ??
+	'localhost:9078';
+
 const protocol = APP_ENV === 'local' ? 'http' : 'https';
 
 export const BASE_URL = `${protocol}://${DOMAIN}/api`;
