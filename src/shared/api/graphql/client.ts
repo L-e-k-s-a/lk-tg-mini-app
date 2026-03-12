@@ -1,4 +1,5 @@
 import { EndPoints, isDev } from '@/shared/constants/base';
+import { detectPlatform } from '@/shared/lib/platform/get-platform';
 import {
 	ApolloClient,
 	ApolloLink,
@@ -12,7 +13,6 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from 'graphql-ws';
-import { Platform } from 'react-native';
 
 const getCookie = (name: string) => {
 	const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -22,8 +22,8 @@ const getCookie = (name: string) => {
 export const getAccessToken = async (): Promise<Record<string, string>> => {
 	try {
 		let token: string | null = null;
-
-		if (Platform.OS === 'web') {
+		const platform = detectPlatform();
+		if (platform === 'web') {
 			token = getCookie('access_token');
 		} else {
 			token = await SecureStore.getItemAsync('access_token');

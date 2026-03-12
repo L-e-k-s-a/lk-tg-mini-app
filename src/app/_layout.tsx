@@ -17,7 +17,7 @@ const InitialLayout = () => {
 		return (
 			<ErrorView
 				error={{
-					message: 'ошибка при запросе',
+					message: error.message,
 				}}
 			/>
 		);

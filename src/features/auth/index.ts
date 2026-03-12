@@ -1,2 +1,1 @@
-export * from './model/auth.store';
-export * from './ui/login-webview';
+export * from './hooks/useTgAuth';
