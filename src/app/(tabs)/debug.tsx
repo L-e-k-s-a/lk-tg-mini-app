@@ -4,7 +4,7 @@ import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function DebugTgInfo() {
 	const {
@@ -40,16 +40,6 @@ export default function DebugTgInfo() {
 		return () => clearInterval(interval);
 	}, []);
 
-	const testDetection = () => {
-		Alert.alert(
-			'Информация об устройстве',
-			`Платформа: ${platform} (${platformName})\n` +
-				`Telegram: ${isTg ? '✅' : '❌'}\n` +
-				`Мобильное: ${isMobile ? '✅' : '❌'}\n` +
-				`UserAgent: ${userAgent}`,
-		);
-	};
-
 	if (isLoading) {
 		return (
 			<MainLayout>
@@ -82,12 +72,6 @@ export default function DebugTgInfo() {
 						numberOfLines={3}>
 						User Agent: {userAgent}
 					</Text>
-					<Button
-						title='Тест определения'
-						onPress={testDetection}
-						variant='secondary'
-						style={styles.testButton}
-					/>
 				</View>
 
 				{webAppInfo && (
