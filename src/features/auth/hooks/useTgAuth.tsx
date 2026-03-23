@@ -1,81 +1,72 @@
-import {
-	AppPlatform,
-	detectPlatform,
-	getPlatformName,
-	isMobilePlatform,
-	isTgPlatform,
-} from '@/shared/lib/platform/get-platform';
-import { init as initTmaSDK, retrieveRawInitData } from '@tma.js/sdk';
+import { init, retrieveLaunchParams } from '@tma.js/sdk';
 import { useEffect, useState } from 'react';
 
 export const useTgAuth = () => {
+	const [tgUser, setTgUser] = useState<any>(null);
+	const [tgWebApp, setTgWebApp] = useState<any>(null);
 	const [tgInitialized, setTgInitialized] = useState(false);
-	const [tgUser, setTgUser] = useState<any | null>(null);
-	const [tgWebApp, setTgWebApp] = useState<any | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [platform, setPlatform] = useState<AppPlatform>('unknown');
-	const [rawInitData, setRawInitData] = useState<string | null>(null);
+	const [rawInitData, setRawInitData] = useState<any>('');
 
 	useEffect(() => {
-		const initialize = async () => {
-			if (typeof window === 'undefined') return;
+		if (typeof window === 'undefined') return;
 
-			try {
-				// Initialize TMA SDK
-				const webApp: any = await initTmaSDK();
+		const isTg = !!window.Telegram?.WebApp;
 
-				if (webApp) {
-					setTgWebApp(webApp);
+		if (!isTg) {
+			console.warn('Not in Telegram environment');
+			setIsLoading(false);
+			return;
+		}
 
-					// Get platform info
-					const currentPlatform = detectPlatform();
-					setPlatform(currentPlatform);
+		try {
+			const app: any = init();
+			setTgWebApp(app);
 
-					// Get user data
-					const user = webApp.initDataUnsafe?.user;
-					if (user) {
-						setTgUser(user);
-					}
+			const user = app.initDataUnsafe?.user;
+			if (user) setTgUser(user);
 
-					// Retrieve raw init data
-					const initData = retrieveRawInitData();
-					if (initData) {
-						setRawInitData(initData);
-					}
+			const { tgWebAppData: initData } = retrieveLaunchParams();
+			setRawInitData(initData);
 
-					// Expand WebApp
-					try {
-						webApp.expand();
-					} catch (e) {
-						console.error('Error expanding WebApp:', e);
-					}
+			app.ready();
+			app.expand();
 
-					webApp.ready();
-					setTgInitialized(true);
-				}
-			} catch (error) {
-				console.error('Failed to initialize TMA SDK:', error);
-				setPlatform(detectPlatform());
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		initialize();
+			setTgInitialized(true);
+		} catch (e) {
+			console.error('TG init error:', e);
+		} finally {
+			setIsLoading(false);
+		}
 	}, []);
+
+	const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+
+	const isMobile = /Android|iPhone|iPad|iPod/i.test(userAgent);
+
+	const platform = tgWebApp?.platform || 'unknown';
+
+	const platformNameMap: Record<string, string> = {
+		ios: 'iOS',
+		android: 'Android',
+		web: 'Web',
+		tdesktop: 'Telegram Desktop',
+	};
+
+	const platformName = platformNameMap[platform] || platform;
+
+	const isTg = !!tgWebApp;
 
 	return {
 		tgInitialized,
 		tgUser,
-		tgWebApp,
 		isLoading,
 		platform,
-		platformName: getPlatformName(platform),
-		isTg: isTgPlatform(platform),
-		isMobile: isMobilePlatform(platform),
-		isTgEnvironment: isTgPlatform(platform),
-		userAgent:
-			typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+		platformName,
+		isTg,
+		isMobile,
+		userAgent,
 		rawInitData,
+		tgWebApp,
 	};
 };
