@@ -1,162 +1,88 @@
-import { useTgAuth } from '@/features/auth/hooks/useTgAuth';
-import { Button } from '@/shared';
-import { Colors } from '@/shared/constants/theme';
-import { MainLayout } from '@/shared/layouts';
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { isTMAFp } from '@tma.js/bridge';
+import { init as initTmaSDK, retrieveRawInitData } from '@tma.js/sdk';
+import * as TE from 'fp-ts/TaskEither';
+import { pipe } from 'fp-ts/function';
+import { useEffect, useState } from 'react';
 
-export default function DebugTgInfo() {
-	const {
-		tgInitialized,
-		tgUser,
-		isLoading,
-		platform,
-		platformName,
-		isTg,
-		isMobile,
-		userAgent,
-		rawInitData,
-		tgWebApp,
-	} = useTgAuth();
-
-	const [fullWebAppData, setFullWebAppData] = useState<string>('');
+export const useTgAuth = () => {
+	const [tgInitialized, setTgInitialized] = useState(false);
+	const [tgUser, setTgUser] = useState<any | null>(null);
+	const [tgWebApp, setTgWebApp] = useState<any | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [isTgEnvironment, setIsTgEnvironment] = useState(false);
+	const [rawInitData, setRawInitData] = useState<string | null>(null);
 
 	useEffect(() => {
-		// Get full WebApp data from tgWebApp object
-		if (tgWebApp) {
-			const allData: any = {};
-			Object.keys(tgWebApp).forEach((key) => {
-				try {
-					const value = tgWebApp[key];
-					if (typeof value !== 'function') {
-						allData[key] = value;
-					}
-				} catch (e) {
-					allData[key] = 'Error accessing';
+		if (typeof window === 'undefined') return;
+
+		const initializeTE = pipe(
+			isTMAFp('complete'),
+			TE.chain((isTMA) => {
+				setIsTgEnvironment(isTMA);
+
+				if (!isTMA) {
+					return TE.right(null);
 				}
-			});
-			setFullWebAppData(JSON.stringify(allData, null, 2));
-		}
-	}, [tgWebApp]);
 
-	if (isLoading) {
-		return (
-			<MainLayout>
-				<View style={styles.container}>
-					<Text style={styles.title}>⏳ Загрузка Telegram WebApp...</Text>
-				</View>
-			</MainLayout>
+				// Initialize SDK - wrap the Promise in TaskEither
+				return TE.tryCatch(
+					async () => initTmaSDK(),
+					(error) =>
+						new Error(`Failed to initialize TMA SDK: ${String(error)}`),
+				);
+			}),
+			TE.chain((webApp: any) => {
+				if (!webApp) {
+					return TE.right(null);
+				}
+
+				// Process WebApp data
+				setTgWebApp(webApp);
+
+				const user = webApp.initDataUnsafe?.user;
+				if (user) {
+					setTgUser(user);
+				}
+
+				const initData = retrieveRawInitData();
+				if (initData) {
+					setRawInitData(initData);
+				}
+
+				try {
+					webApp.expand();
+				} catch (e) {
+					console.error('Error expanding WebApp:', e);
+				}
+
+				webApp.ready();
+				setTgInitialized(true);
+
+				return TE.right(webApp);
+			}),
 		);
-	}
 
-	return (
-		<MainLayout>
-			<ScrollView style={styles.container}>
-				<Text style={styles.title}>📱 Telegram WebApp Debug</Text>
+		// Execute the TaskEither
+		const run = async () => {
+			try {
+				await initializeTE();
+			} catch (error) {
+				console.error('Failed to initialize:', error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
 
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Статус:</Text>
-					<Text>Инициализирован: {tgInitialized ? '✅' : '⏳'}</Text>
-					<Text>Среда TG: {isTg ? '✅' : '❌'}</Text>
-					<Text>
-						Платформа: {platform} ({platformName})
-					</Text>
-					<Text>Мобильное устройство: {isMobile ? '✅' : '❌'}</Text>
-				</View>
+		run();
+	}, []);
 
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>📱 Информация об устройстве:</Text>
-					<Text
-						style={styles.userAgentText}
-						numberOfLines={3}>
-						User Agent: {userAgent}
-					</Text>
-				</View>
-
-				{tgUser && (
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>👤 Пользователь:</Text>
-						<Text>ID: {tgUser.id}</Text>
-						<Text>
-							Имя: {tgUser.first_name} {tgUser.last_name || ''}
-						</Text>
-						<Text>Username: @{tgUser.username || 'не указан'}</Text>
-						<Text>Язык: {tgUser.language_code || 'не указан'}</Text>
-					</View>
-				)}
-
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>🔍 Raw Init Data:</Text>
-					<ScrollView style={styles.jsonContainer}>
-						<Text style={styles.jsonText}>{rawInitData || 'Нет данных'}</Text>
-					</ScrollView>
-				</View>
-
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>📦 Полные данные WebApp:</Text>
-					<ScrollView style={styles.jsonContainer}>
-						<Text style={styles.jsonText}>
-							{fullWebAppData || 'Нет данных'}
-						</Text>
-					</ScrollView>
-				</View>
-
-				<Button
-					style={styles.buttonBack}
-					title='Вернуться назад'
-					onPress={() => router.replace('/')}
-					variant='primary'
-				/>
-			</ScrollView>
-		</MainLayout>
-	);
-}
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		padding: 20,
-	},
-	title: {
-		fontSize: 20,
-		fontWeight: 'bold',
-		marginBottom: 20,
-	},
-	section: {
-		backgroundColor: Colors.background,
-		padding: 15,
-		borderRadius: 10,
-		marginBottom: 15,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 3,
-	},
-	sectionTitle: {
-		fontSize: 16,
-		fontWeight: '600',
-		marginBottom: 10,
-	},
-	buttonBack: {
-		marginTop: 20,
-		marginBottom: 40,
-	},
-	userAgentText: {
-		fontSize: 12,
-		marginBottom: 10,
-		color: '#666',
-	},
-	jsonContainer: {
-		backgroundColor: '#f5f5f5',
-		padding: 10,
-		borderRadius: 8,
-		maxHeight: 300,
-	},
-	jsonText: {
-		fontSize: 10,
-		fontFamily: 'monospace',
-		color: '#333',
-	},
-});
+	return {
+		tgInitialized,
+		tgUser,
+		tgWebApp,
+		isLoading,
+		isTg: isTgEnvironment,
+		isTgEnvironment,
+		rawInitData,
+	};
+};
