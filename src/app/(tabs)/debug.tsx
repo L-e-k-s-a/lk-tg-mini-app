@@ -19,7 +19,9 @@ export default function DebugTgInfo() {
 	} = useTgAuth();
 
 	const [webAppInfo, setWebAppInfo] = useState<any>(null);
-	console.log('webAppInfo', webAppInfo);
+	const [fullWebAppData, setFullWebAppData] = useState<string>('');
+	const [initDataDebug, setInitDataDebug] = useState<string>('');
+
 	useEffect(() => {
 		// Периодически проверяем обновление данных WebApp
 		const interval = setInterval(() => {
@@ -32,7 +34,54 @@ export default function DebugTgInfo() {
 						colorScheme: webApp.colorScheme,
 						isExpanded: webApp.isExpanded,
 						viewportHeight: webApp.viewportHeight,
+						viewportStableHeight: webApp.viewportStableHeight,
+						headerColor: webApp.headerColor,
+						backgroundColor: webApp.backgroundColor,
+						isClosingConfirmationEnabled: webApp.isClosingConfirmationEnabled,
 					});
+
+					// Получаем все данные из WebApp для отладки
+					const allData: any = {};
+					Object.keys(webApp).forEach((key) => {
+						try {
+							const value = webApp[key];
+							if (typeof value !== 'function') {
+								allData[key] = value;
+							}
+						} catch (e) {
+							allData[key] = 'Error accessing';
+						}
+					});
+					setFullWebAppData(JSON.stringify(allData, null, 2));
+
+					// Отлаживаем initData
+					if (webApp.initData) {
+						const params = new URLSearchParams(webApp.initData);
+						const debugInitData: any = {};
+						for (const [key, value] of params.entries()) {
+							if (key === 'user') {
+								try {
+									debugInitData.user = JSON.parse(decodeURIComponent(value));
+								} catch {
+									debugInitData.user = value;
+								}
+							} else {
+								debugInitData[key] = value;
+							}
+						}
+						setInitDataDebug(JSON.stringify(debugInitData, null, 2));
+					} else {
+						setInitDataDebug('NO initData');
+					}
+
+					// Проверяем все возможные места где могут быть данные пользователя
+					console.log('=== USER DATA CHECK ===');
+					console.log(
+						'webApp.initDataUnsafe?.user:',
+						webApp.initDataUnsafe?.user,
+					);
+					console.log('webApp.initDataUnsafe:', webApp.initDataUnsafe);
+					console.log('webApp.user:', webApp.user);
 				}
 			}
 		}, 1000);
@@ -82,12 +131,13 @@ export default function DebugTgInfo() {
 						<Text>Цветовая схема: {webAppInfo.colorScheme}</Text>
 						<Text>Развернут: {webAppInfo.isExpanded ? '✅' : '❌'}</Text>
 						<Text>Высота: {webAppInfo.viewportHeight}</Text>
+						<Text>Стабильная высота: {webAppInfo.viewportStableHeight}</Text>
 					</View>
 				)}
 
 				{tgUser && (
 					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>👤 Пользователь:</Text>
+						<Text style={styles.sectionTitle}>👤 Пользователь (из хука):</Text>
 						<Text>ID: {tgUser.id}</Text>
 						<Text>
 							Имя: {tgUser.first_name} {tgUser.last_name || ''}
@@ -96,6 +146,43 @@ export default function DebugTgInfo() {
 						<Text>Язык: {tgUser.language_code || 'не указан'}</Text>
 					</View>
 				)}
+
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>🔍 initDataUnsafe:</Text>
+					<ScrollView style={styles.jsonContainer}>
+						<Text style={styles.jsonText}>
+							{(() => {
+								if (
+									typeof window !== 'undefined' &&
+									window.Telegram?.WebApp?.initDataUnsafe
+								) {
+									return JSON.stringify(
+										window.Telegram.WebApp.initDataUnsafe,
+										null,
+										2,
+									);
+								}
+								return 'Нет данных';
+							})()}
+						</Text>
+					</ScrollView>
+				</View>
+
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>🔍 initData (разобранный):</Text>
+					<ScrollView style={styles.jsonContainer}>
+						<Text style={styles.jsonText}>{initDataDebug || 'Нет данных'}</Text>
+					</ScrollView>
+				</View>
+
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>📦 Все данные WebApp:</Text>
+					<ScrollView style={styles.jsonContainer}>
+						<Text style={styles.jsonText}>
+							{fullWebAppData || 'Нет данных'}
+						</Text>
+					</ScrollView>
+				</View>
 
 				<Button
 					style={styles.buttonBack}
@@ -123,7 +210,11 @@ const styles = StyleSheet.create({
 		padding: 15,
 		borderRadius: 10,
 		marginBottom: 15,
-		boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+		elevation: 3,
 	},
 	sectionTitle: {
 		fontSize: 16,
@@ -132,13 +223,22 @@ const styles = StyleSheet.create({
 	},
 	buttonBack: {
 		marginTop: 20,
-	},
-	testButton: {
-		marginTop: 10,
+		marginBottom: 40,
 	},
 	userAgentText: {
 		fontSize: 12,
 		marginBottom: 10,
 		color: '#666',
+	},
+	jsonContainer: {
+		backgroundColor: '#f5f5f5',
+		padding: 10,
+		borderRadius: 8,
+		maxHeight: 300,
+	},
+	jsonText: {
+		fontSize: 10,
+		fontFamily: 'monospace',
+		color: '#333',
 	},
 });
