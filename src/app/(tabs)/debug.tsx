@@ -3,42 +3,11 @@ import { Button } from '@/shared';
 import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function DebugTgInfo() {
-	const {
-		tgInitialized,
-		tgUser,
-		isLoading,
-		platform,
-		platformName,
-		isTg,
-		isMobile,
-		userAgent,
-		rawInitData,
-		tgWebApp,
-	} = useTgAuth();
-
-	const [fullWebAppData, setFullWebAppData] = useState<string>('');
-
-	useEffect(() => {
-		// Get full WebApp data from tgWebApp object
-		if (tgWebApp) {
-			const allData: any = {};
-			Object.keys(tgWebApp).forEach((key) => {
-				try {
-					const value = tgWebApp[key];
-					if (typeof value !== 'function') {
-						allData[key] = value;
-					}
-				} catch (e) {
-					allData[key] = 'Error accessing';
-				}
-			});
-			setFullWebAppData(JSON.stringify(allData, null, 2));
-		}
-	}, [tgWebApp]);
+	const { tgInitialized, tgUser, isLoading, rawInitData } = useTgAuth();
 
 	if (isLoading) {
 		return (
@@ -54,25 +23,6 @@ export default function DebugTgInfo() {
 		<MainLayout>
 			<ScrollView style={styles.container}>
 				<Text style={styles.title}>📱 Telegram WebApp Debug</Text>
-
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Статус:</Text>
-					<Text>Инициализирован: {tgInitialized ? '✅' : '⏳'}</Text>
-					<Text>Среда TG: {isTg ? '✅' : '❌'}</Text>
-					<Text>
-						Платформа: {platform} ({platformName})
-					</Text>
-					<Text>Мобильное устройство: {isMobile ? '✅' : '❌'}</Text>
-				</View>
-
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>📱 Информация об устройстве:</Text>
-					<Text
-						style={styles.userAgentText}
-						numberOfLines={3}>
-						User Agent: {userAgent}
-					</Text>
-				</View>
 
 				{tgUser && (
 					<View style={styles.section}>
@@ -90,15 +40,6 @@ export default function DebugTgInfo() {
 					<Text style={styles.sectionTitle}>🔍 Raw Init Data:</Text>
 					<ScrollView style={styles.jsonContainer}>
 						<Text style={styles.jsonText}>{rawInitData || 'Нет данных'}</Text>
-					</ScrollView>
-				</View>
-
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>📦 Полные данные WebApp:</Text>
-					<ScrollView style={styles.jsonContainer}>
-						<Text style={styles.jsonText}>
-							{fullWebAppData || 'Нет данных'}
-						</Text>
 					</ScrollView>
 				</View>
 
