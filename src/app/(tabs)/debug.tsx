@@ -16,78 +16,29 @@ export default function DebugTgInfo() {
 		isTg,
 		isMobile,
 		userAgent,
+		rawInitData,
+		tgWebApp,
 	} = useTgAuth();
 
-	const [webAppInfo, setWebAppInfo] = useState<any>(null);
 	const [fullWebAppData, setFullWebAppData] = useState<string>('');
-	const [initDataDebug, setInitDataDebug] = useState<string>('');
 
 	useEffect(() => {
-		// Периодически проверяем обновление данных WebApp
-		const interval = setInterval(() => {
-			if (typeof window !== 'undefined') {
-				const webApp = window.Telegram?.WebApp;
-				if (webApp) {
-					setWebAppInfo({
-						version: webApp.version,
-						platform: webApp.platform,
-						colorScheme: webApp.colorScheme,
-						isExpanded: webApp.isExpanded,
-						viewportHeight: webApp.viewportHeight,
-						viewportStableHeight: webApp.viewportStableHeight,
-						headerColor: webApp.headerColor,
-						backgroundColor: webApp.backgroundColor,
-						isClosingConfirmationEnabled: webApp.isClosingConfirmationEnabled,
-					});
-
-					// Получаем все данные из WebApp для отладки
-					const allData: any = {};
-					Object.keys(webApp).forEach((key) => {
-						try {
-							const value = webApp[key];
-							if (typeof value !== 'function') {
-								allData[key] = value;
-							}
-						} catch (e) {
-							allData[key] = 'Error accessing';
-						}
-					});
-					setFullWebAppData(JSON.stringify(allData, null, 2));
-
-					// Отлаживаем initData
-					if (webApp.initData) {
-						const params = new URLSearchParams(webApp.initData);
-						const debugInitData: any = {};
-						for (const [key, value] of params.entries()) {
-							if (key === 'user') {
-								try {
-									debugInitData.user = JSON.parse(decodeURIComponent(value));
-								} catch {
-									debugInitData.user = value;
-								}
-							} else {
-								debugInitData[key] = value;
-							}
-						}
-						setInitDataDebug(JSON.stringify(debugInitData, null, 2));
-					} else {
-						setInitDataDebug('NO initData');
+		// Get full WebApp data from tgWebApp object
+		if (tgWebApp) {
+			const allData: any = {};
+			Object.keys(tgWebApp).forEach((key) => {
+				try {
+					const value = tgWebApp[key];
+					if (typeof value !== 'function') {
+						allData[key] = value;
 					}
-
-					// Проверяем все возможные места где могут быть данные пользователя
-					console.log('=== USER DATA CHECK ===');
-					console.log(
-						'webApp.initDataUnsafe?.user:',
-						webApp.initDataUnsafe?.user,
-					);
-					console.log('webApp.initDataUnsafe:', webApp.initDataUnsafe);
-					console.log('webApp.user:', webApp.user);
+				} catch (e) {
+					allData[key] = 'Error accessing';
 				}
-			}
-		}, 1000);
-
-		return () => clearInterval(interval);
-	}, []);
+			});
+			setFullWebAppData(JSON.stringify(allData, null, 2));
+		}
+	}, [tgWebApp]);
 
 	if (isLoading) {
 		return (
@@ -123,21 +74,9 @@ export default function DebugTgInfo() {
 					</Text>
 				</View>
 
-				{webAppInfo && (
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>🌐 WebApp данные:</Text>
-						<Text>Версия: {webAppInfo.version}</Text>
-						<Text>Платформа (WebApp): {webAppInfo.platform}</Text>
-						<Text>Цветовая схема: {webAppInfo.colorScheme}</Text>
-						<Text>Развернут: {webAppInfo.isExpanded ? '✅' : '❌'}</Text>
-						<Text>Высота: {webAppInfo.viewportHeight}</Text>
-						<Text>Стабильная высота: {webAppInfo.viewportStableHeight}</Text>
-					</View>
-				)}
-
 				{tgUser && (
 					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>👤 Пользователь (из хука):</Text>
+						<Text style={styles.sectionTitle}>👤 Пользователь:</Text>
 						<Text>ID: {tgUser.id}</Text>
 						<Text>
 							Имя: {tgUser.first_name} {tgUser.last_name || ''}
@@ -148,35 +87,14 @@ export default function DebugTgInfo() {
 				)}
 
 				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>🔍 initDataUnsafe:</Text>
+					<Text style={styles.sectionTitle}>🔍 Raw Init Data:</Text>
 					<ScrollView style={styles.jsonContainer}>
-						<Text style={styles.jsonText}>
-							{(() => {
-								if (
-									typeof window !== 'undefined' &&
-									window.Telegram?.WebApp?.initDataUnsafe
-								) {
-									return JSON.stringify(
-										window.Telegram.WebApp.initDataUnsafe,
-										null,
-										2,
-									);
-								}
-								return 'Нет данных';
-							})()}
-						</Text>
+						<Text style={styles.jsonText}>{rawInitData || 'Нет данных'}</Text>
 					</ScrollView>
 				</View>
 
 				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>🔍 initData (разобранный):</Text>
-					<ScrollView style={styles.jsonContainer}>
-						<Text style={styles.jsonText}>{initDataDebug || 'Нет данных'}</Text>
-					</ScrollView>
-				</View>
-
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>📦 Все данные WebApp:</Text>
+					<Text style={styles.sectionTitle}>📦 Полные данные WebApp:</Text>
 					<ScrollView style={styles.jsonContainer}>
 						<Text style={styles.jsonText}>
 							{fullWebAppData || 'Нет данных'}

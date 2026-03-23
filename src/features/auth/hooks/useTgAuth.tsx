@@ -5,15 +5,8 @@ import {
 	isMobilePlatform,
 	isTgPlatform,
 } from '@/shared/lib/platform/get-platform';
+import { init as initTmaSDK, retrieveRawInitData } from '@tma.js/sdk';
 import { useEffect, useState } from 'react';
-
-declare global {
-	interface Window {
-		Telegram?: {
-			WebApp?: any;
-		};
-	}
-}
 
 export const useTgAuth = () => {
 	const [tgInitialized, setTgInitialized] = useState(false);
@@ -21,110 +14,55 @@ export const useTgAuth = () => {
 	const [tgWebApp, setTgWebApp] = useState<any | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [platform, setPlatform] = useState<AppPlatform>('unknown');
+	const [rawInitData, setRawInitData] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (typeof window !== 'undefined') {
-			const initialPlatform = detectPlatform();
-			setPlatform(initialPlatform);
+		const initialize = async () => {
+			if (typeof window === 'undefined') return;
 
-			initializeTgWebApp();
-		}
-	}, []);
+			try {
+				// Initialize TMA SDK
+				const webApp: any = initTmaSDK();
 
-	const initializeTgWebApp = () => {
-		const webApp = window.Telegram?.WebApp;
-		if (webApp) {
-			handleTgInit(webApp);
-			setIsLoading(false);
-		} else {
-			const isTelegram = isTgPlatform(detectPlatform());
-
-			if (isTelegram) {
-				let attempts = 0;
-				const checkInterval = setInterval(() => {
-					attempts++;
-					const retryWebApp = window.Telegram?.WebApp;
-
-					if (retryWebApp) {
-						clearInterval(checkInterval);
-						handleTgInit(retryWebApp);
-						setIsLoading(false);
-					} else if (attempts >= 10) {
-						clearInterval(checkInterval);
-						setIsLoading(false);
-						setPlatform(detectPlatform());
-					}
-				}, 500);
-			} else {
-				// Если не в Telegram, загружаем скрипт для веб-версии
-				loadTgScript();
-			}
-		}
-	};
-
-	const loadTgScript = () => {
-		const script = document.createElement('script');
-		script.src = 'https://telegram.org/js/telegram-web-app.js?59';
-		script.async = true;
-		script.onload = () => {
-			setTimeout(() => {
-				const webApp = window.Telegram?.WebApp;
 				if (webApp) {
-					handleTgInit(webApp);
-				} else {
-					console.error('WebApp not found after script load');
+					setTgWebApp(webApp);
+
+					// Get platform info
+					const currentPlatform = detectPlatform();
+					setPlatform(currentPlatform);
+
+					// Get user data
+					const user = webApp.initDataUnsafe?.user;
+					if (user) {
+						setTgUser(user);
+					}
+
+					// Retrieve raw init data
+					const initData = retrieveRawInitData();
+					if (initData) {
+						setRawInitData(initData);
+					}
+
+					// Expand WebApp
+					try {
+						webApp.expand();
+					} catch (e) {
+						console.error('Error expanding WebApp:', e);
+					}
+
+					webApp.ready();
+					setTgInitialized(true);
 				}
+			} catch (error) {
+				console.error('Failed to initialize TMA SDK:', error);
+				setPlatform(detectPlatform());
+			} finally {
 				setIsLoading(false);
-			}, 200);
+			}
 		};
 
-		script.onerror = () => {
-			console.error('Failed to load Tg Bridge');
-			setIsLoading(false);
-		};
-
-		document.head.appendChild(script);
-	};
-
-	const handleTgInit = (webApp: any) => {
-		setTgWebApp(webApp);
-		const updatedPlatform = detectPlatform();
-		setPlatform(updatedPlatform);
-
-		// Try to get user data from different possible locations
-		let user = null;
-
-		if (webApp.initDataUnsafe?.user) {
-			user = webApp.initDataUnsafe.user;
-		} else if (webApp.initDataUnsafe?.user_data) {
-			user = webApp.initDataUnsafe.user_data;
-		} else if (webApp.user) {
-			user = webApp.user;
-		}
-
-		// Also check if we have user data in the main WebApp object
-		if (user) {
-			setTgUser(user);
-		} else {
-			console.warn('No user data found in Telegram WebApp:', {
-				hasInitDataUnsafe: !!webApp.initDataUnsafe,
-				initDataUnsafeKeys: webApp.initDataUnsafe
-					? Object.keys(webApp.initDataUnsafe)
-					: [],
-				webAppKeys: Object.keys(webApp),
-			});
-		}
-
-		// Expand the WebApp to full height
-		try {
-			webApp.expand();
-		} catch (e) {
-			console.error('Error expanding WebApp:', e);
-		}
-
-		webApp.ready();
-		setTgInitialized(true);
-	};
+		initialize();
+	}, []);
 
 	return {
 		tgInitialized,
@@ -138,5 +76,6 @@ export const useTgAuth = () => {
 		isTgEnvironment: isTgPlatform(platform),
 		userAgent:
 			typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+		rawInitData,
 	};
 };
