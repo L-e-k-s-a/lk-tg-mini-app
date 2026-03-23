@@ -19,7 +19,7 @@ export default function DebugTgInfo() {
 	} = useTgAuth();
 
 	const [webAppInfo, setWebAppInfo] = useState<any>(null);
-
+	console.log('webAppInfo', webAppInfo);
 	useEffect(() => {
 		// Периодически проверяем обновление данных WebApp
 		const interval = setInterval(() => {
