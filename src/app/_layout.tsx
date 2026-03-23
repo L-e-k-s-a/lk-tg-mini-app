@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 const InitialLayout = () => {
-	const auth = false;
+	const auth = true;
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
 			<Stack.Protected guard={auth}>
