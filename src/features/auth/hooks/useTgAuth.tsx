@@ -91,9 +91,28 @@ export const useTgAuth = () => {
 		const updatedPlatform = detectPlatform();
 		setPlatform(updatedPlatform);
 
-		const user = webApp.initDataUnsafe?.user;
+		// Try to get user data from different possible locations
+		let user = null;
+
+		if (webApp.initDataUnsafe?.user) {
+			user = webApp.initDataUnsafe.user;
+		} else if (webApp.initDataUnsafe?.user_data) {
+			user = webApp.initDataUnsafe.user_data;
+		} else if (webApp.user) {
+			user = webApp.user;
+		}
+
+		// Also check if we have user data in the main WebApp object
 		if (user) {
 			setTgUser(user);
+		} else {
+			console.warn('No user data found in Telegram WebApp:', {
+				hasInitDataUnsafe: !!webApp.initDataUnsafe,
+				initDataUnsafeKeys: webApp.initDataUnsafe
+					? Object.keys(webApp.initDataUnsafe)
+					: [],
+				webAppKeys: Object.keys(webApp),
+			});
 		}
 
 		// Expand the WebApp to full height
