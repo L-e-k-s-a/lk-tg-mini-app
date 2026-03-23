@@ -1,7 +1,11 @@
-import { isTMAFp } from '@tma.js/bridge';
+import {
+	AppPlatform,
+	detectPlatform,
+	getPlatformName,
+	isMobilePlatform,
+	isTgPlatform,
+} from '@/shared/lib/platform/get-platform';
 import { init as initTmaSDK, retrieveRawInitData } from '@tma.js/sdk';
-import * as TE from 'fp-ts/TaskEither';
-import { pipe } from 'fp-ts/function';
 import { useEffect, useState } from 'react';
 
 export const useTgAuth = () => {
@@ -9,7 +13,7 @@ export const useTgAuth = () => {
 	const [tgUser, setTgUser] = useState<any | null>(null);
 	const [tgWebApp, setTgWebApp] = useState<any | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [isTgEnvironment, setIsTgEnvironment] = useState(false);
+	const [platform, setPlatform] = useState<AppPlatform>('unknown');
 	const [rawInitData, setRawInitData] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -17,59 +21,41 @@ export const useTgAuth = () => {
 			if (typeof window === 'undefined') return;
 
 			try {
-				// Check if running in Telegram environment using fp-ts
-				const result: any = await pipe(
-					isTMAFp('complete'),
-					TE.match(
-						(error: any) => {
-							console.error('Error checking TMA environment:', error);
-							return { isTMA: false, error };
-						},
-						(isTMA) => ({ isTMA, error: null }),
-					),
-				)();
+				// Initialize TMA SDK
+				const webApp: any = await initTmaSDK();
 
-				if (result.error) {
-					setIsTgEnvironment(false);
-					setIsLoading(false);
-					return;
-				}
+				if (webApp) {
+					setTgWebApp(webApp);
 
-				const isTMA = result.isTMA;
-				setIsTgEnvironment(isTMA);
+					// Get platform info
+					const currentPlatform = detectPlatform();
+					setPlatform(currentPlatform);
 
-				if (isTMA) {
-					// Initialize TMA SDK - this returns a Promise
-					const webApp: any = await initTmaSDK();
-
-					if (webApp) {
-						setTgWebApp(webApp);
-
-						// Get user data
-						const user = webApp.initDataUnsafe?.user;
-						if (user) {
-							setTgUser(user);
-						}
-
-						// Retrieve raw init data
-						const initData = retrieveRawInitData();
-						if (initData) {
-							setRawInitData(initData);
-						}
-
-						// Expand WebApp
-						try {
-							webApp.expand();
-						} catch (e) {
-							console.error('Error expanding WebApp:', e);
-						}
-
-						webApp.ready();
-						setTgInitialized(true);
+					// Get user data
+					const user = webApp.initDataUnsafe?.user;
+					if (user) {
+						setTgUser(user);
 					}
+
+					// Retrieve raw init data
+					const initData = retrieveRawInitData();
+					if (initData) {
+						setRawInitData(initData);
+					}
+
+					// Expand WebApp
+					try {
+						webApp.expand();
+					} catch (e) {
+						console.error('Error expanding WebApp:', e);
+					}
+
+					webApp.ready();
+					setTgInitialized(true);
 				}
 			} catch (error) {
-				console.error('Failed to initialize:', error);
+				console.error('Failed to initialize TMA SDK:', error);
+				setPlatform(detectPlatform());
 			} finally {
 				setIsLoading(false);
 			}
@@ -83,8 +69,13 @@ export const useTgAuth = () => {
 		tgUser,
 		tgWebApp,
 		isLoading,
-		isTg: isTgEnvironment,
-		isTgEnvironment,
+		platform,
+		platformName: getPlatformName(platform),
+		isTg: isTgPlatform(platform),
+		isMobile: isMobilePlatform(platform),
+		isTgEnvironment: isTgPlatform(platform),
+		userAgent:
+			typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
 		rawInitData,
 	};
 };
