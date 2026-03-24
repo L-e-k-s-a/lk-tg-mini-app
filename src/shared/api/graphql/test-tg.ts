@@ -1,6 +1,6 @@
 export const retrieveRawInitData = () => {
 	const user = {
-		id: 3228777,
+		id: 5647242440,
 		first_name: 'Kolya',
 		last_name: 'Gay',
 		username: 'stratenkokolya',
