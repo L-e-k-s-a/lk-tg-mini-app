@@ -14,14 +14,9 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
-import { retrieveRawInitData } from '@tma.js/sdk';
+import { retrieveLaunchParams, retrieveRawInitData } from '@tma.js/sdk';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from 'graphql-ws';
-
-//
-// -----------------------------
-// utils
-// -----------------------------
 
 const getCookie = (name: string) => {
 	if (typeof document === 'undefined') return null;
@@ -29,19 +24,23 @@ const getCookie = (name: string) => {
 	return match ? decodeURIComponent(match[2]) : null;
 };
 
-//
-// -----------------------------
-// AUTH HEADERS (ГЛАВНОЕ)
-// -----------------------------
-
 export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 	try {
 		const platform = detectPlatform();
-		console.log('platfrom', platform);
-		// ✅ Telegram Mini App
+
 		if (isTgPlatform(platform)) {
-			// const initData = window?.Telegram?.WebApp?.initData;
-			const initData = retrieveRawInitData();
+			let initData = retrieveRawInitData();
+			const launchParams = retrieveLaunchParams();
+
+			const urlParams = new URLSearchParams(initData);
+			const userParam = urlParams.get('user');
+
+			if (!userParam && launchParams?.tgWebAppData?.user) {
+				const userString = JSON.stringify(launchParams.tgWebAppData.user);
+				urlParams.set('user', userString);
+				initData = urlParams.toString();
+			}
+
 			if (initData) {
 				return {
 					Authorization: `tma ${initData}`,
@@ -67,20 +66,10 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 	}
 };
 
-//
-// -----------------------------
-// HTTP LINK
-// -----------------------------
-
 const httpLink = new HttpLink({
 	uri: `${EndPoints.api}/graphql`,
 	credentials: 'include',
 });
-
-//
-// -----------------------------
-// WS LINK (С АВТОРИЗАЦИЕЙ)
-// -----------------------------
 
 const wsClient = createClient({
 	url: EndPoints.wss,
@@ -101,11 +90,6 @@ const wsClient = createClient({
 
 const wsLink = new GraphQLWsLink(wsClient);
 
-//
-// -----------------------------
-// ERROR LINK
-// -----------------------------
-
 const errorLink = onError(({ error }: any) => {
 	if (!error) return;
 
@@ -118,11 +102,6 @@ const errorLink = onError(({ error }: any) => {
 	}
 });
 
-//
-// -----------------------------
-// AUTH LINK
-// -----------------------------
-
 const authLink = setContext(async (_, { headers }) => {
 	const authHeaders = await getAuthHeaders();
 
@@ -133,11 +112,6 @@ const authLink = setContext(async (_, { headers }) => {
 		},
 	};
 });
-
-//
-// -----------------------------
-// SPLIT LINK (HTTP / WS)
-// -----------------------------
 
 const splitLink = split(
 	({ query }) => {
@@ -150,11 +124,6 @@ const splitLink = split(
 	wsLink,
 	httpLink,
 );
-
-//
-// -----------------------------
-// APOLLO CLIENT
-// -----------------------------
 
 export const apolloClient = new ApolloClient({
 	link: ApolloLink.from([errorLink, authLink, splitLink]),
