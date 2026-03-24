@@ -1,5 +1,4 @@
-// lib/platform/detect.ts
-import { Platform as RNPlatform } from 'react-native';
+import { retrieveLaunchParams } from '@tma.js/sdk';
 
 declare global {
 	interface Window {
@@ -12,13 +11,20 @@ declare global {
 export type AppPlatform = 'ios' | 'android' | 'web' | 'tg' | 'unknown';
 
 export const detectPlatform = (): AppPlatform => {
+	const RNPlatform = require('react-native').Platform;
 	if (RNPlatform.OS === 'ios') return 'ios';
 	if (RNPlatform.OS === 'android') return 'android';
 
-	// ✅ Web check
 	if (typeof window !== 'undefined') {
-		if (window?.Telegram?.WebApp) {
-			return 'tg';
+		// Telegram Web
+		if (window?.Telegram?.WebApp) return 'tg';
+
+		// TMA MiniApp detection
+		try {
+			const launchParams = retrieveLaunchParams();
+			if (launchParams?.tmaApp) return 'tg';
+		} catch (e) {
+			// Not in miniapp
 		}
 
 		return 'web';
