@@ -1,6 +1,8 @@
-import { retrieveRawInitData } from '@/shared/api/graphql/test-tg';
 import { EndPoints, isDev } from '@/shared/constants/base';
-import { isTgPlatform } from '@/shared/lib/platform/get-platform';
+import {
+	detectPlatform,
+	isTgPlatform,
+} from '@/shared/lib/platform/get-platform';
 import {
 	ApolloClient,
 	ApolloLink,
@@ -12,7 +14,7 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
-// import { retrieveLaunchParams, retrieveRawInitData } from '@tma.js/sdk';
+import { retrieveLaunchParams, retrieveRawInitData } from '@tma.js/sdk';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from 'graphql-ws';
 
@@ -24,21 +26,21 @@ const getCookie = (name: string) => {
 
 export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 	try {
-		// const platform = detectPlatform();
-		const platform = 'tg';
+		const platform = detectPlatform();
+		// const platform = 'tg';
 
 		if (isTgPlatform(platform)) {
 			let initData = retrieveRawInitData();
-			// const launchParams = retrieveLaunchParams();
+			const launchParams = retrieveLaunchParams();
 
-			// const urlParams = new URLSearchParams(initData);
-			// const userParam = urlParams.get('user');
+			const urlParams = new URLSearchParams(initData);
+			const userParam = urlParams.get('user');
 
-			// if (!userParam && launchParams?.tgWebAppData?.user) {
-			// 	const userString = JSON.stringify(launchParams.tgWebAppData.user);
-			// 	urlParams.set('user', userString);
-			// 	initData = urlParams.toString();
-			// }
+			if (!userParam && launchParams?.tgWebAppData?.user) {
+				const userString = JSON.stringify(launchParams.tgWebAppData.user);
+				urlParams.set('user', userString);
+				initData = urlParams.toString();
+			}
 
 			if (initData) {
 				return {
@@ -51,10 +53,10 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 		}
 
 		// ✅ Web (cookie)
-		// if (platform === 'web') {
-		// 	const token = getCookie('access_token');
-		// 	return token ? { 'x-access-token': token } : {};
-		// }
+		if (platform === 'web') {
+			const token = getCookie('access_token');
+			return token ? { 'x-access-token': token } : {};
+		}
 
 		// ✅ Native (Expo)
 		const token = await SecureStore.getItemAsync('access_token');

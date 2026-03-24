@@ -9,8 +9,8 @@ import * as Linking from 'expo-linking';
 // 	Constants.expoConfig?.extra?.API_DOMAIN ??
 // 	'localhost:9078';
 
-const APP_ENV = 'local';
-const DOMAIN: string = '10.140.0.145:9078';
+const APP_ENV: string = 'dev';
+const DOMAIN: string = 'lk-dev.tsutmb.ru';
 
 const protocol = APP_ENV === 'local' ? 'http' : 'https';
 
