@@ -14,6 +14,7 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
+import { retrieveRawInitData } from '@tma.js/sdk';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from 'graphql-ws';
 
@@ -36,11 +37,11 @@ const getCookie = (name: string) => {
 export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 	try {
 		const platform = detectPlatform();
-
+		console.log('platfrom', platform);
 		// ✅ Telegram Mini App
 		if (isTgPlatform(platform)) {
-			const initData = window?.Telegram?.WebApp?.initData;
-
+			// const initData = window?.Telegram?.WebApp?.initData;
+			const initData = retrieveRawInitData();
 			if (initData) {
 				return {
 					Authorization: `tma ${initData}`,
