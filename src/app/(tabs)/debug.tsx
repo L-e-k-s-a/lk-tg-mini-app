@@ -7,7 +7,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function DebugTgInfo() {
-	const { tgInitialized, tgUser, isLoading, rawInitData } = useTgAuth();
+	const { tgUser, isLoading, rawInitData } = useTgAuth();
 
 	if (isLoading) {
 		return (
