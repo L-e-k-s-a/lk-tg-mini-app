@@ -14,7 +14,7 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
-import { retrieveLaunchParams, retrieveRawInitData } from '@tma.js/sdk';
+import { retrieveRawInitData } from '@tma.js/sdk';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from 'graphql-ws';
 
@@ -29,22 +29,10 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 		const platform = detectPlatform();
 
 		if (isTgPlatform(platform)) {
-			let initData = retrieveRawInitData();
-			const launchParams = retrieveLaunchParams();
-
-			const urlParams = new URLSearchParams(initData);
-			const userParam = urlParams.get('user');
-
-			if (!userParam && launchParams?.tgWebAppData?.user) {
-				const userString = JSON.stringify(launchParams.tgWebAppData.user);
-				urlParams.set('user', userString);
-				initData = urlParams.toString();
-			}
-
+			// ✅ Always retrieve the raw initData Telegram sent
+			const initData = retrieveRawInitData();
 			if (initData) {
-				return {
-					Authorization: `tma ${initData}`,
-				};
+				return { Authorization: `tma ${initData}` };
 			}
 
 			console.warn('No initData in Telegram WebApp');
