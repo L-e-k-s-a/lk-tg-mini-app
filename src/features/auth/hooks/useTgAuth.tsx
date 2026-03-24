@@ -1,4 +1,3 @@
-import { signInWithTg } from '@/shared/api/http/tg-auth';
 import { retrieveLaunchParams, retrieveRawInitData } from '@tma.js/sdk';
 import { useEffect, useState } from 'react';
 
@@ -9,13 +8,12 @@ export const useTgAuth = () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		const init = async () => {
+		const init = () => {
 			try {
 				const initData = retrieveRawInitData();
 
 				if (initData) {
 					setRawInitData(initData);
-					await signInWithTg(initData);
 				}
 
 				const launchParams = retrieveLaunchParams();
