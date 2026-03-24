@@ -27,7 +27,6 @@ const getCookie = (name: string) => {
 export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 	try {
 		const platform = detectPlatform();
-		// const platform = 'tg';
 
 		if (isTgPlatform(platform)) {
 			let initData = retrieveRawInitData();
