@@ -1,3 +1,4 @@
+import { signInWithTg } from '@/shared/api/http/tg-auth';
 import { retrieveLaunchParams, retrieveRawInitData } from '@tma.js/sdk';
 import { useEffect, useState } from 'react';
 
@@ -8,26 +9,30 @@ export const useTgAuth = () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		try {
-			// raw init data (for backend later)
-			const initData = retrieveRawInitData();
-			if (initData) {
-				setRawInitData(initData);
+		const init = async () => {
+			try {
+				const initData = retrieveRawInitData();
+
+				if (initData) {
+					setRawInitData(initData);
+					await signInWithTg(initData);
+				}
+
+				const launchParams = retrieveLaunchParams();
+
+				if (launchParams?.tgWebAppData?.user) {
+					setTgUser(launchParams.tgWebAppData.user);
+				}
+
+				setTgInitialized(true);
+			} catch (error) {
+				console.error('Telegram SDK init error:', error);
+			} finally {
+				setIsLoading(false);
 			}
+		};
 
-			// parsed Telegram data
-			const launchParams = retrieveLaunchParams();
-
-			if (launchParams?.tgWebAppData?.user) {
-				setTgUser(launchParams.tgWebAppData.user);
-			}
-
-			setTgInitialized(true);
-		} catch (error) {
-			console.error('Telegram SDK init error:', error);
-		} finally {
-			setIsLoading(false);
-		}
+		init();
 	}, []);
 
 	return {
