@@ -10,7 +10,7 @@ import * as Linking from 'expo-linking';
 // 	'localhost:9078';
 
 const APP_ENV = 'local';
-const DOMAIN: string = '10.140.0.69:9078';
+const DOMAIN: string = '10.140.0.145:9078';
 
 const protocol = APP_ENV === 'local' ? 'http' : 'https';
 
