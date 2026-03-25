@@ -33,23 +33,17 @@ export function UserImage({
 
 	useEffect(() => {
 		const loadImage = async () => {
-			// If custom src is provided, use it directly
 			if (src) {
 				setImageDataUrl(src);
 				return;
 			}
-
-			// If no id, show fallback
 			if (!id) {
 				setImageDataUrl(null);
 				return;
 			}
-
 			const imageUrl = `${EndPoints.userpic}/${id}`;
 			const platform = detectPlatform();
 			const isTelegram = isTgPlatform(platform);
-
-			// For Telegram, we need to fetch with auth headers
 			if (isTelegram) {
 				setIsLoading(true);
 				try {
@@ -76,7 +70,6 @@ export function UserImage({
 					setIsLoading(false);
 				}
 			} else {
-				// For non-Telegram platforms, use direct img tag
 				setImageDataUrl(imageUrl);
 			}
 		};
@@ -94,23 +87,6 @@ export function UserImage({
 			}
 		};
 	}, [id, src]);
-
-	// Show loading state
-	if (isLoading) {
-		return (
-			<div
-				className={className}
-				style={{
-					...style,
-					backgroundColor: '#f0f0f0',
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-				}}>
-				<span style={{ fontSize: '24px', opacity: 0.5 }}>⏳</span>
-			</div>
-		);
-	}
 
 	// Show fallback if no image or error
 	if (!imageDataUrl || imageError) {
