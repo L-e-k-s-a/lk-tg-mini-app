@@ -15,7 +15,7 @@ export default function NotFoundScreen() {
 				</Typography>
 				<Button
 					title='Вернуться на главную'
-					onPress={() => router.replace('/')}
+					onPress={() => router.replace('/(tabs)')}
 					variant='primary'
 				/>
 			</View>
