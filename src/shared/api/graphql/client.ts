@@ -26,29 +26,19 @@ const getCookie = (name: string) => {
 export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 	try {
 		const platform = detectPlatform();
-
 		if (isTgPlatform(platform)) {
-			// ✅ Always retrieve the raw initData Telegram sent
 			const initData = retrieveRawInitData();
 			if (initData) {
-				console.log('✅ Got initData for auth'); // Debug log
 				return { Authorization: `tma ${initData}` };
 			}
-
 			console.warn('No initData in Telegram WebApp');
 			return {};
 		}
-
-		// ✅ Web (cookie)
 		if (platform === 'web') {
 			const token = getCookie('access_token');
-			console.log('Web auth token:', token ? 'present' : 'missing'); // Debug log
-			return token ? { 'access-token': token } : {};
+			return token ? { 'x-access-token': token } : {};
 		}
-
-		// ✅ Native (Expo)
 		const token = await SecureStore.getItemAsync('access_token');
-		console.log('Native auth token:', token ? 'present' : 'missing'); // Debug log
 		return token ? { 'x-access-token': token } : {};
 	} catch (error) {
 		console.error('Failed to get auth headers', error);
@@ -56,12 +46,9 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 	}
 };
 
-// ✅ Create a custom link that ensures headers are set for every request
 const authLink = new ApolloLink((operation, forward) => {
 	return new Observable((observer) => {
 		let isSubscription = false;
-
-		// Check if this is a subscription
 		const definition = getMainDefinition(operation.query);
 		if (
 			definition.kind === 'OperationDefinition' &&
@@ -126,7 +113,6 @@ const wsClient = createClient({
 
 	connectionParams: async () => {
 		const headers = await getAuthHeaders();
-		console.log('WS Connection params:', Object.keys(headers)); // Debug log
 		return headers;
 	},
 
@@ -140,41 +126,36 @@ const wsClient = createClient({
 
 const wsLink = new GraphQLWsLink(wsClient);
 
-const errorLink = onError(
-	({ graphQLErrors, networkError, operation, forward }) => {
-		if (graphQLErrors) {
-			graphQLErrors.forEach(({ message, locations, path, extensions }) => {
-				console.error(
-					`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-					extensions,
-				);
+const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
+	if (graphQLErrors) {
+		graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+			console.error(
+				`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+				extensions,
+			);
 
-				// ✅ Handle 401 errors
-				if (extensions?.code === 'UNAUTHENTICATED' || message.includes('401')) {
-					console.error('Authentication error, headers might be missing');
-					// Log the headers that were sent
-					const context = operation.getContext();
-					console.error('Request headers:', context.headers);
-				}
-			});
+			// ✅ Handle 401 errors
+			if (extensions?.code === 'UNAUTHENTICATED' || message.includes('401')) {
+				console.error('Authentication error, headers might be missing');
+				// Log the headers that were sent
+				const context = operation.getContext();
+				console.error('Request headers:', context.headers);
+			}
+		});
+	}
+
+	if (networkError) {
+		console.error(`[Network error]: ${networkError}`);
+
+		// ✅ Log network error details
+		if (networkError.message) {
+			console.error('Network error message:', networkError.message);
 		}
-
-		if (networkError) {
-			console.error(`[Network error]: ${networkError}`);
-
-			// ✅ Log network error details
-			if (networkError.message) {
-				console.error('Network error message:', networkError.message);
-			}
-			if ('statusCode' in networkError) {
-				console.error('Status code:', networkError.statusCode);
-			}
-			if ('result' in networkError) {
-				console.error('Response:', networkError.result);
-			}
+		if ('statusCode' in networkError) {
+			console.error('Status code:', networkError.statusCode);
 		}
-	},
-);
+	}
+});
 
 const splitLink = split(
 	({ query }) => {
