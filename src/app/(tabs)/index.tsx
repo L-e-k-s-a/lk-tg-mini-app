@@ -1,6 +1,6 @@
 import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
-import { Typography } from '@/shared/ui';
+import { Typography, UserImage } from '@/shared/ui';
 import { useUserInfoStore } from '@/shared/zustand';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -11,15 +11,14 @@ export default function HomeScreenTab() {
 	return (
 		<MainLayout>
 			<View style={styles.section}>
+				<UserImage
+					id={me?.data.guid}
+					style={{ width: 40, height: 40, borderRadius: 50 }}
+				/>
 				<Typography
 					variant='h1'
 					style={styles.title}>
-					Welcome to FSD Structure
-				</Typography>
-				<Typography
-					variant='body'
-					style={styles.description}>
-					This is a simple Expo app with Feature-Sliced Design architecture
+					{`${me?.data.full_name}`}
 				</Typography>
 			</View>
 		</MainLayout>
