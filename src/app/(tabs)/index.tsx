@@ -1,4 +1,3 @@
-import { EndPoints } from '@/shared/constants/base';
 import { Colors } from '@/shared/constants/theme';
 import { MainLayout } from '@/shared/layouts';
 import { Typography, UserImage } from '@/shared/ui';
@@ -13,6 +12,7 @@ export default function HomeScreenTab() {
 		<MainLayout>
 			<View style={styles.section}>
 				<UserImage
+					debug={true}
 					id={me?.data.guid}
 					style={{ width: 40, height: 40, borderRadius: 50 }}
 				/>
@@ -20,11 +20,6 @@ export default function HomeScreenTab() {
 					variant='h1'
 					style={styles.title}>
 					{`${me?.data.full_name}`}
-				</Typography>
-				<Typography
-					variant='h3'
-					style={styles.title}>
-					{`URL: ${EndPoints.userpic}/${me?.data.guid}`}
 				</Typography>
 			</View>
 		</MainLayout>
