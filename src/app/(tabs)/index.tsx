@@ -12,7 +12,6 @@ export default function HomeScreenTab() {
 		<MainLayout>
 			<View style={styles.section}>
 				<UserImage
-					debug={true}
 					id={me?.data.guid}
 					style={{ width: 40, height: 40, borderRadius: 50 }}
 				/>
