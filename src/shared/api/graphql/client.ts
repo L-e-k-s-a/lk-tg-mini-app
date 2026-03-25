@@ -10,10 +10,9 @@ import {
 	InMemoryCache,
 	split,
 } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
-import { getMainDefinition } from '@apollo/client/utilities';
+import { getMainDefinition, Observable } from '@apollo/client/utilities';
 import { retrieveRawInitData } from '@tma.js/sdk';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from 'graphql-ws';
@@ -32,6 +31,7 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 			// ✅ Always retrieve the raw initData Telegram sent
 			const initData = retrieveRawInitData();
 			if (initData) {
+				console.log('✅ Got initData for auth'); // Debug log
 				return { Authorization: `tma ${initData}` };
 			}
 
@@ -42,11 +42,13 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 		// ✅ Web (cookie)
 		if (platform === 'web') {
 			const token = getCookie('access_token');
+			console.log('Web auth token:', token ? 'present' : 'missing'); // Debug log
 			return token ? { 'access-token': token } : {};
 		}
 
 		// ✅ Native (Expo)
 		const token = await SecureStore.getItemAsync('access_token');
+		console.log('Native auth token:', token ? 'present' : 'missing'); // Debug log
 		return token ? { 'x-access-token': token } : {};
 	} catch (error) {
 		console.error('Failed to get auth headers', error);
@@ -54,9 +56,68 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 	}
 };
 
+// ✅ Create a custom link that ensures headers are set for every request
+const authLink = new ApolloLink((operation, forward) => {
+	return new Observable((observer) => {
+		let isSubscription = false;
+
+		// Check if this is a subscription
+		const definition = getMainDefinition(operation.query);
+		if (
+			definition.kind === 'OperationDefinition' &&
+			definition.operation === 'subscription'
+		) {
+			isSubscription = true;
+		}
+
+		// Get auth headers
+		getAuthHeaders()
+			.then((authHeaders) => {
+				// Set headers on the operation context
+				operation.setContext(({ headers = {} }) => ({
+					headers: {
+						...headers,
+						...authHeaders,
+					},
+				}));
+
+				// For non-subscriptions, we can proceed with the request
+				if (!isSubscription) {
+					const subscription = forward(operation).subscribe({
+						next: observer.next.bind(observer),
+						error: observer.error.bind(observer),
+						complete: observer.complete.bind(observer),
+					});
+
+					return () => {
+						subscription.unsubscribe();
+					};
+				} else {
+					// For subscriptions, just forward (wsLink handles auth)
+					const subscription = forward(operation).subscribe({
+						next: observer.next.bind(observer),
+						error: observer.error.bind(observer),
+						complete: observer.complete.bind(observer),
+					});
+
+					return () => {
+						subscription.unsubscribe();
+					};
+				}
+			})
+			.catch((error) => {
+				console.error('Error getting auth headers:', error);
+				observer.error(error);
+			});
+	});
+});
+
 const httpLink = new HttpLink({
 	uri: `${EndPoints.api}/graphql`,
 	credentials: 'include',
+	fetchOptions: {
+		credentials: 'include',
+	},
 });
 
 const wsClient = createClient({
@@ -65,6 +126,7 @@ const wsClient = createClient({
 
 	connectionParams: async () => {
 		const headers = await getAuthHeaders();
+		console.log('WS Connection params:', Object.keys(headers)); // Debug log
 		return headers;
 	},
 
@@ -78,28 +140,41 @@ const wsClient = createClient({
 
 const wsLink = new GraphQLWsLink(wsClient);
 
-const errorLink = onError(({ error }: any) => {
-	if (!error) return;
+const errorLink = onError(
+	({ graphQLErrors, networkError, operation, forward }) => {
+		if (graphQLErrors) {
+			graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+				console.error(
+					`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+					extensions,
+				);
 
-	if ('errors' in error) {
-		error.errors.forEach(({ message, locations, path }: any) => {
-			console.error(`[GraphQL error]: ${message}`, locations, path);
-		});
-	} else {
-		console.error('[Network error]:', error);
-	}
-});
+				// ✅ Handle 401 errors
+				if (extensions?.code === 'UNAUTHENTICATED' || message.includes('401')) {
+					console.error('Authentication error, headers might be missing');
+					// Log the headers that were sent
+					const context = operation.getContext();
+					console.error('Request headers:', context.headers);
+				}
+			});
+		}
 
-const authLink = setContext(async (_, { headers }) => {
-	const authHeaders = await getAuthHeaders();
+		if (networkError) {
+			console.error(`[Network error]: ${networkError}`);
 
-	return {
-		headers: {
-			...headers,
-			...authHeaders,
-		},
-	};
-});
+			// ✅ Log network error details
+			if (networkError.message) {
+				console.error('Network error message:', networkError.message);
+			}
+			if ('statusCode' in networkError) {
+				console.error('Status code:', networkError.statusCode);
+			}
+			if ('result' in networkError) {
+				console.error('Response:', networkError.result);
+			}
+		}
+	},
+);
 
 const splitLink = split(
 	({ query }) => {
@@ -119,5 +194,18 @@ export const apolloClient = new ApolloClient({
 	queryDeduplication: false,
 	devtools: {
 		enabled: isDev,
+	},
+	defaultOptions: {
+		watchQuery: {
+			fetchPolicy: 'network-only',
+			errorPolicy: 'all',
+		},
+		query: {
+			fetchPolicy: 'network-only',
+			errorPolicy: 'all',
+		},
+		mutate: {
+			errorPolicy: 'all',
+		},
 	},
 });
