@@ -1,6 +1,6 @@
-import { Loader, Typography } from '@/shared';
 import { useMe } from '@/shared/api';
 import { MainLayout } from '@/shared/layouts';
+import { Loader, Typography } from '@/shared/ui';
 import { ErrorView } from '@/widgets/error-view';
 import React from 'react';
 

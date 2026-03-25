@@ -1,6 +1,6 @@
-import { Typography } from '@/shared';
 import { Colors } from '@/shared/constants/theme';
 import { FullScreenLayout } from '@/shared/layouts';
+import { Typography } from '@/shared/ui';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 

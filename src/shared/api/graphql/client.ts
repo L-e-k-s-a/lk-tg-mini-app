@@ -42,7 +42,7 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 		// ✅ Web (cookie)
 		if (platform === 'web') {
 			const token = getCookie('access_token');
-			return token ? { 'x-access-token': token } : {};
+			return token ? { 'access-token': token } : {};
 		}
 
 		// ✅ Native (Expo)

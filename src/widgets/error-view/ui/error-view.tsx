@@ -1,6 +1,6 @@
-import { Button, IconSymbol, Typography } from '@/shared';
 import { Colors } from '@/shared/constants/theme';
 import { FullScreenLayout } from '@/shared/layouts';
+import { Button, IconSymbol, Typography } from '@/shared/ui';
 import { IconSymbolName } from '@/shared/ui/icon-symbol/icon-symbol';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
