@@ -1,48 +1,62 @@
+// UserImage.tsx - React Web version for Telegram Mini App
 import { EndPoints } from '@/shared/constants/base';
-import { Image as ExpoImage } from 'expo-image';
-import React from 'react';
-import { StyleProp, ViewStyle } from 'react-native';
+import React, { useState } from 'react';
 
 interface ImageProps {
 	id?: string;
-	style?: StyleProp<any>;
-	containerStyle?: StyleProp<ViewStyle>;
 	src?: string;
-	contentFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
-	transition?: number;
-	placeholder?: string;
-	priority?: 'low' | 'normal' | 'high';
+	className?: string;
+	style?: React.CSSProperties;
+	alt?: string;
 	onError?: () => void;
 	onLoad?: () => void;
+	fallbackIcon?: React.ReactNode;
 }
 
 export function UserImage({
 	id,
-	style,
 	src,
-	contentFit = 'cover',
-	transition = 300,
-	placeholder,
-	priority = 'normal',
+	className,
+	style,
+	alt = 'User avatar',
 	onError,
 	onLoad,
+	fallbackIcon,
 }: ImageProps) {
-	const imageSource = src ? src : id ? `${EndPoints.userpic}/${id}` : undefined;
+	const [imageError, setImageError] = useState(false);
 
-	if (!imageSource) {
-		return null;
+	const imageUrl = src || (id ? `${EndPoints.userpic}/${id}` : null);
+
+	if (!imageUrl || imageError) {
+		return (
+			fallbackIcon || (
+				<div
+					className={className}
+					style={{
+						...style,
+						backgroundColor: '#e0e0e0',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+					}}>
+					<span style={{ fontSize: '24px' }}>👤</span>
+				</div>
+			)
+		);
 	}
 
 	return (
-		<ExpoImage
-			source={imageSource}
+		<img
+			src={imageUrl}
+			alt={alt}
+			className={className}
 			style={style}
-			contentFit={contentFit}
-			transition={transition}
-			placeholder={placeholder}
-			priority={priority}
-			onError={onError}
+			onError={() => {
+				setImageError(true);
+				onError?.();
+			}}
 			onLoad={onLoad}
+			loading='lazy'
 		/>
 	);
 }
