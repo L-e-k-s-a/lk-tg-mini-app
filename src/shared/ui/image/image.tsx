@@ -1,5 +1,5 @@
-import { getAuthHeaders } from '@/shared/api';
-import { EndPoints } from '@/shared/constants/base';
+import { getAuthHeaders } from '@/shared/api/graphql/client';
+import { EndPoints } from '@/shared/constants/model/base';
 import {
 	detectPlatform,
 	isTgPlatform,
@@ -29,7 +29,6 @@ export function UserImage({
 }: ImageProps) {
 	const [imageError, setImageError] = useState(false);
 	const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
-	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		const loadImage = async () => {
@@ -45,7 +44,6 @@ export function UserImage({
 			const platform = detectPlatform();
 			const isTelegram = isTgPlatform(platform);
 			if (isTelegram) {
-				setIsLoading(true);
 				try {
 					const headers = await getAuthHeaders();
 
@@ -67,16 +65,12 @@ export function UserImage({
 					setImageError(true);
 					onError?.();
 				} finally {
-					setIsLoading(false);
 				}
 			} else {
 				setImageDataUrl(imageUrl);
 			}
 		};
-
 		loadImage();
-
-		// Cleanup function to revoke blob URL
 		return () => {
 			if (
 				imageDataUrl &&
@@ -88,7 +82,6 @@ export function UserImage({
 		};
 	}, [id, src]);
 
-	// Show fallback if no image or error
 	if (!imageDataUrl || imageError) {
 		return (
 			fallbackIcon || (
@@ -107,7 +100,6 @@ export function UserImage({
 		);
 	}
 
-	// For Telegram, render img with blob URL
 	if (isTgPlatform(detectPlatform()) && imageDataUrl.startsWith('blob:')) {
 		return (
 			<img
@@ -121,7 +113,6 @@ export function UserImage({
 		);
 	}
 
-	// For non-Telegram platforms, render img with direct URL
 	return (
 		<img
 			src={imageDataUrl}

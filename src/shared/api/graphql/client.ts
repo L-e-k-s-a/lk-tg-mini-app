@@ -1,4 +1,4 @@
-import { EndPoints, isDev } from '@/shared/constants/base';
+import { EndPoints, isDev } from '@/shared/constants/model/base';
 import {
 	detectPlatform,
 	isTgPlatform,

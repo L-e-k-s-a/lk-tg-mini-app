@@ -1,24 +1,24 @@
-import { Colors } from '@/shared/constants/theme';
+import { useUser } from '@/features/auth';
+import { Colors } from '@/shared/constants/model/theme';
 import { MainLayout } from '@/shared/layouts';
 import { Typography, UserImage } from '@/shared/ui';
-import { useUserInfoStore } from '@/shared/zustand';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 export default function HomeScreenTab() {
-	const { me } = useUserInfoStore();
-	console.log('me', me);
+	const user = useUser();
+	console.log(user);
 	return (
 		<MainLayout>
 			<View style={styles.section}>
 				<UserImage
-					id={me?.data.guid}
+					id={user?.data.id}
 					style={{ width: 40, height: 40, borderRadius: 50 }}
 				/>
 				<Typography
 					variant='h1'
 					style={styles.title}>
-					{`${me?.data.full_name}`}
+					{`${user?.data.fullName}`}
 				</Typography>
 			</View>
 		</MainLayout>

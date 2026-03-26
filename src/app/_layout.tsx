@@ -1,8 +1,8 @@
-import { useMe } from '@/shared/api';
-import { AppDefaultTheme } from '@/shared/constants/theme';
+import { mapAuthMeToUser, useAuth, useAuthStore, useMe } from '@/features/auth';
+import { AppDefaultTheme } from '@/shared/constants/model/theme';
 import { ApolloProvider, AppContextProvider } from '@/shared/lib';
 import { Loader } from '@/shared/ui';
-import { useUserInfoStore } from '@/shared/zustand/user-info/user-info.store';
+import { ErrorView } from '@/widgets/error-view';
 import { ThemeProvider } from '@react-navigation/native';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -11,29 +11,28 @@ import { Platform } from 'react-native';
 
 const InitialLayout = () => {
 	const { data, loading, error } = useMe();
-	const { setMe, setInfo } = useUserInfoStore();
+	const isLogged = useAuth();
+	const setUser = useAuthStore((state) => state.setUser);
 
-	// Update store when data is available
 	useEffect(() => {
-		if (data?.me) {
-			setMe(data.me);
+		if (data !== undefined) {
+			setUser(mapAuthMeToUser(data));
 		}
-	}, [data, setMe, setInfo]);
+	}, [data, setUser]);
 
-	const isAuthenticated = !loading && !error && data?.me;
-
-	if (loading) {
-		return <Loader />;
-	}
+	if (loading) return <Loader />;
+	if (error) return <ErrorView error={error} />;
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
-			<Stack.Protected guard={isAuthenticated}>
+			<Stack.Protected guard={isLogged}>
 				<Stack.Screen name='(tabs)' />
 			</Stack.Protected>
-			<Stack.Protected guard={!isAuthenticated}>
+
+			<Stack.Protected guard={!isLogged}>
 				<Stack.Screen name='(auth)' />
 			</Stack.Protected>
+
 			<Stack.Screen name='+not-found' />
 		</Stack>
 	);

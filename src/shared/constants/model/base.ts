@@ -1,24 +1,12 @@
 import * as Linking from 'expo-linking';
 
-// const APP_ENV = (process.env.EXPO_PUBLIC_APP_ENV ??
-// 	Constants.expoConfig?.extra?.APP_ENV ??
-// 	'local') as 'local' | 'dev' | 'prod';
-
-// const DOMAIN =
-// 	process.env.EXPO_PUBLIC_API_DOMAIN ??
-// 	Constants.expoConfig?.extra?.API_DOMAIN ??
-// 	'localhost:9078';
-
 const APP_ENV: string = 'dev';
 const DOMAIN: string = 'lk-dev.tsutmb.ru';
-
 const protocol = APP_ENV === 'local' ? 'http' : 'https';
-
-export const BASE_URL = `${protocol}://${DOMAIN}/api`;
-
+const BASE_URL = `${protocol}://${DOMAIN}/api`;
 const redirectBase = Linking.createURL('');
+const dev = 'lk-dev.tsutmb.ru';
 
-export const dev = 'lk-dev.tsutmb.ru';
 export const isDev = DOMAIN === dev;
 
 export const EndPoints = {

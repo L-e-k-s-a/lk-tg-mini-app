@@ -1,4 +1,4 @@
-import { Colors } from '@/shared/constants/theme';
+import { Colors } from '@/shared/constants/model/theme';
 import { MainLayout } from '@/shared/layouts/main-layout/main-layout';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';

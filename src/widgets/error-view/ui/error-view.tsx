@@ -1,4 +1,4 @@
-import { Colors } from '@/shared/constants/theme';
+import { Colors } from '@/shared/constants/model/theme';
 import { FullScreenLayout } from '@/shared/layouts';
 import { Button, IconSymbol, Typography } from '@/shared/ui';
 import { IconSymbolName } from '@/shared/ui/icon-symbol/icon-symbol';

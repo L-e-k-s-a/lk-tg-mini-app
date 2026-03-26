@@ -1,6 +1,8 @@
-import { Colors } from '@/shared/constants/theme';
+import { Colors } from '@/shared/constants/model/theme';
 import { Container } from '@/shared/ui/container/container';
-import { Header, HeaderProps } from '@/widgets';
+import { Header } from '@/widgets/header';
+import { HeaderProps } from '@/widgets/header/ui/header';
+
 import React, { ReactNode } from 'react';
 import {
 	ScrollView,
