@@ -1,4 +1,10 @@
-import { mapAuthMeToUser, useAuth, useAuthStore, useMe } from '@/features/auth';
+import { getUserType } from '@/entities/user';
+import {
+	mapAuthMeToUser,
+	useAuth,
+	useAuthActions,
+	useMe,
+} from '@/features/auth';
 import { AppDefaultTheme } from '@/shared/constants/model/theme';
 import { ApolloProvider, AppContextProvider } from '@/shared/lib';
 import { Loader } from '@/shared/ui';
@@ -12,13 +18,17 @@ import { Platform } from 'react-native';
 const InitialLayout = () => {
 	const { data, loading, error } = useMe();
 	const isLogged = useAuth();
-	const setUser = useAuthStore((state) => state.setUser);
+	// const setUser = useAuthStore((state) => state.setUser);
+	const { setUser, setRole } = useAuthActions();
 
 	useEffect(() => {
 		if (data !== undefined) {
-			setUser(mapAuthMeToUser(data));
+			const user = mapAuthMeToUser(data);
+			setUser(user);
+			const role = getUserType(user.groups);
+			setRole(role);
 		}
-	}, [data, setUser]);
+	}, [data, setUser, setRole]);
 
 	if (loading) return <Loader />;
 	if (error) return <ErrorView error={error} />;

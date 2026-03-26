@@ -1,4 +1,5 @@
 import { useUser } from '@/features/auth';
+import { useGetRole } from '@/features/auth/model/auth.selectors';
 import { Colors } from '@/shared/constants/model/theme';
 import { MainLayout } from '@/shared/layouts';
 import { Typography, UserImage } from '@/shared/ui';
@@ -7,6 +8,7 @@ import { StyleSheet, View } from 'react-native';
 
 export default function HomeScreenTab() {
 	const user = useUser();
+	const userRole = useGetRole();
 	console.log(user);
 	return (
 		<MainLayout>
@@ -16,9 +18,14 @@ export default function HomeScreenTab() {
 					style={{ width: 40, height: 40, borderRadius: 50 }}
 				/>
 				<Typography
-					variant='h1'
+					variant='h2'
 					style={styles.title}>
 					{`${user?.data.fullName}`}
+				</Typography>
+				<Typography
+					variant='h3'
+					style={styles.title}>
+					{`Role: ${userRole}`}
 				</Typography>
 			</View>
 		</MainLayout>
