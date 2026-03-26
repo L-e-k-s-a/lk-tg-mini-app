@@ -1,5 +1,5 @@
-import { ME } from '@/features/auth/api/api/api.me';
 import { useQuery } from '@apollo/client';
+import { ME } from '../api/api.me';
 
 export const useMe = () => {
 	const { data, loading, error } = useQuery(ME, {
