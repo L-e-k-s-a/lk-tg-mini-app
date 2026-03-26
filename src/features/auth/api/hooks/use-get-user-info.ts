@@ -1,4 +1,4 @@
-import { ME } from '@/features/auth/api/graphql/api.me';
+import { ME } from '@/features/auth/api/api/api.me';
 import { useQuery } from '@apollo/client';
 
 export const useMe = () => {
