@@ -3,7 +3,7 @@ import { Colors } from '@/shared/constants/model/theme';
 import React from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
-export const Loader = ({ text = 'Получение данных...' }) => {
+export const Loader = ({ text = 'Получение ...' }) => {
 	return (
 		<View
 			style={{

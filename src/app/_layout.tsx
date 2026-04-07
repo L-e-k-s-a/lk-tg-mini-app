@@ -22,12 +22,6 @@ const InitialLayout = () => {
 	// const setUser = useAuthStore((state) => state.setUser);
 	const { setUser, setRole } = useAuthActions();
   const { setPlatform } = platformSlice()
-  
-  useEffect(() => {
-    
-  }, [setPlatform])
-  console.log("fsfsfsfs")
-
 
 	useEffect(() => {
 		if (data !== undefined) {
