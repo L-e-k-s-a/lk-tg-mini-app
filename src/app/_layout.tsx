@@ -6,7 +6,8 @@ import {
 	useMe,
 } from '@/features/auth';
 import { AppDefaultTheme } from '@/shared/constants/model/theme';
-import { ApolloProvider, AppContextProvider } from '@/shared/lib';
+import { ApolloProvider, AppContextProvider, detectPlatform } from '@/shared/lib';
+import { platformSlice } from '@/shared/store/platform';
 import { Loader } from '@/shared/ui';
 import { ErrorView } from '@/widgets/error-view';
 import { ThemeProvider } from '@react-navigation/native';
@@ -20,6 +21,13 @@ const InitialLayout = () => {
 	const isLogged = useAuth();
 	// const setUser = useAuthStore((state) => state.setUser);
 	const { setUser, setRole } = useAuthActions();
+  const { setPlatform } = platformSlice()
+  
+  useEffect(() => {
+    
+  }, [setPlatform])
+  console.log("fsfsfsfs")
+
 
 	useEffect(() => {
 		if (data !== undefined) {
@@ -28,7 +36,12 @@ const InitialLayout = () => {
 			const role = getUserType(user.groups);
 			setRole(role);
 		}
+		const platform = detectPlatform()
+    setPlatform(platform)
+    console.log(platform)
 	}, [data, setUser, setRole]);
+
+	console.log('dgsdg')
 
 	if (loading) return <Loader />;
 	if (error) return <ErrorView error={error} />;
