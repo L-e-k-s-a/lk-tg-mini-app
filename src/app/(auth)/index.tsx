@@ -1,12 +1,21 @@
+import { EndPoints } from '@/shared/constants';
 import { Colors } from '@/shared/constants/model/theme';
 import { FullScreenLayout } from '@/shared/layouts';
 import { Typography } from '@/shared/ui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 export default function AuthOnlyMaxScreen() {
+
+	const tg = window.Telegram?.WebApp
+
+	useEffect(() => {
+		tg.openLink(EndPoints.auth)
+	}, [])
+
 	return (
 		<FullScreenLayout>
+			
 			<View style={styles.section}>
 				<Typography
 					variant='h1'
@@ -19,6 +28,7 @@ export default function AuthOnlyMaxScreen() {
 					На данном этапе аутентификация доступна только в Max.
 				</Typography>
 			</View>
+		
 		</FullScreenLayout>
 	);
 }
