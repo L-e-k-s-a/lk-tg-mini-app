@@ -37,7 +37,7 @@ const InitialLayout = () => {
 
 	console.log('dgsdg')
 
-	if (loading) return <Loader />;
+	if (loading) return <Loader text='куку'/>;
 	if (error) return <ErrorView error={error} />;
 
 	return (
