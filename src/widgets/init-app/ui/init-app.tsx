@@ -13,7 +13,7 @@ export const InitApp = () => {
     setIsReady(true)
     console.log(detectPlatform)
   }, [setPlatform])
-  
+  console.log("fsfsfsfs")
 
   if (!isReady) {
     return <Loader />
